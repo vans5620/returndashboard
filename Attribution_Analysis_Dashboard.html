@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
   --bg:       #FAF8F4;
@@ -70,6 +71,14 @@ body{
 .pbtn.active{ background: var(--M); border-color: var(--M); color: #fff; }
 .period-info{ font-size:11px; color:var(--text2); }
 .period-info span{ color:var(--text); font-weight:600; }
+.export-btn{
+  padding: 5px 14px; font-size: 11px; font-weight: 700;
+  border-radius: 6px; border: 1.5px solid #08AF56;
+  background: transparent; color: #08AF56;
+  cursor: pointer; transition: all .15s; font-family: inherit;
+  letter-spacing: 0.2px;
+}
+.export-btn:hover{ background: #08AF56; color: #fff; }
 .note-chip{
   background: #EBF3FB; border: 1px solid #A8CDE8;
   border-radius: 5px; padding: 3px 10px;
@@ -171,12 +180,13 @@ td.na{ color:var(--text3); font-style:italic; }
 <div class="ctrl">
   <span class="ctrl-label">Period</span>
   <div class="period-btns">
-    <button class="pbtn active" onclick="setPeriod('MTD')">MTD</button>
-    <button class="pbtn" onclick="setPeriod('1M')">1M</button>
-    <button class="pbtn" onclick="setPeriod('SI')">Since Inception</button>
+    <button class="pbtn active" onclick="setPeriod('MTD')" id="pbtn-MTD">MTD</button>
+    <button class="pbtn" onclick="setPeriod('1M')" id="pbtn-1M">1M</button>
+    <button class="pbtn" onclick="setPeriod('SI')" id="pbtn-SI">Since Inception</button>
   </div>
   <div class="period-info">Period: <span id="period-str">—</span></div>
   <div class="note-chip">Equity (11): Fixed Income &amp; Alternates excluded</div>
+  <button class="export-btn" onclick="exportToExcel()" title="Export current period data to Excel">&#8681; Export Excel</button>
   <div class="legend">
     <div class="leg"><div class="leg-dot" style="background:var(--M)"></div>Moderate (9)</div>
     <div class="leg"><div class="leg-dot" style="background:var(--A)"></div>Aggressive (10)</div>
@@ -439,6 +449,81 @@ function setLevel(sid, level){
 }
 
 renderAll();
+
+// ── Update period button labels with short date range after data loads ──────
+function updatePeriodBtnLabels(){
+  ['MTD','1M','SI'].forEach(pk => {
+    const btn = document.getElementById('pbtn-'+pk);
+    if(!btn) return;
+    const p = D.data[pk]?.period || '';
+    // Extract just start month+year for MTD/1M, keep "Since Inception" for SI
+    if(pk === 'SI'){
+      btn.textContent = 'Since Inception';
+    } else {
+      // period looks like "01 Mar 2026 – 20 Mar 2026"
+      const parts = p.split('–');
+      const start = (parts[0]||'').trim();  // "01 Mar 2026"
+      const tokens = start.split(' ');       // ["01","Mar","2026"]
+      const label = tokens.length >= 3 ? `${pk} (${tokens[1]} '${tokens[2].slice(2)})` : pk;
+      btn.textContent = label;
+    }
+  });
+}
+updatePeriodBtnLabels();
+
+// ── Export to Excel ──────────────────────────────────────────────────────────
+function exportToExcel(){
+  const wb = XLSX.utils.book_new();
+  const periodData = D.data[curPeriod];
+  const periodLabel = periodData?.period || curPeriod;
+  const LEVELS = ['asset_class','category','instrument'];
+  const LEVEL_NAMES = {'asset_class':'Asset Class','category':'Category','instrument':'Instrument'};
+  const METRIC_KEYS = ['contribution','attribution','abs_return'];
+  const METRIC_NAMES = {'contribution':'% Contribution','attribution':'% Attribution','abs_return':'% Abs Return'};
+
+  METRIC_KEYS.forEach(metric => {
+    LEVELS.forEach(level => {
+      const keys = D.all_keys[level] || [];
+      const sheetName = `${METRIC_NAMES[metric].replace('%','').trim()} - ${LEVEL_NAMES[level]}`.substring(0, 31);
+
+      // Header rows
+      const rows = [];
+      rows.push([`Allocate PMS — ${METRIC_NAMES[metric]}`,'','','']);
+      rows.push([`Period: ${periodLabel}`,'','','']);
+      rows.push([`Level: ${LEVEL_NAMES[level]}`,'','','']);
+      rows.push(['']); // blank row
+      rows.push([LEVEL_NAMES[level], 'Moderate (9)', 'Aggressive (10)', 'Equity (11)']);
+
+      keys.forEach(k => {
+        const row = [k];
+        SCHEMES.forEach(s => {
+          const v = getVal(s, level, k, metric);
+          row.push(v !== null ? parseFloat(v.toFixed(2)) : null);
+        });
+        rows.push(row);
+      });
+
+      // Total row
+      const totRow = ['Total'];
+      SCHEMES.forEach(s => {
+        const tot = Object.values((periodData?.schemes[s]?.agg[level]) || {})
+                          .reduce((a, b) => a + (b[metric] || 0), 0);
+        totRow.push(parseFloat(tot.toFixed(2)));
+      });
+      rows.push(totRow);
+
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+
+      // Column widths
+      ws['!cols'] = [{wch:26},{wch:16},{wch:18},{wch:14}];
+
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    });
+  });
+
+  const periodSlug = periodLabel.replace(/[^a-zA-Z0-9]/g,'_');
+  XLSX.writeFile(wb, `Allocate_Attribution_${curPeriod}_${periodSlug}.xlsx`);
+}
 </script>
 </body>
 </html>
