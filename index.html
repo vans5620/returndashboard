@@ -8,522 +8,104 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root {
-  --bg:       #FAF8F4;
-  --surface:  #FFFFFF;
-  --surface2: #F4F0E8;
-  --surface3: #EDE8DF;
-  --border:   #E2D9CC;
-  --border2:  #CEC4B4;
-  --text:     #1C1917;
-  --text2:    #6B6460;
-  --text3:    #A89F96;
-  --gain:     #16A34A;
-  --loss:     #DC2626;
-  --M:        #222A9C;
-  --A:        #FFC000;
-  --E:        #7BA0FF;
-  --r:        10px;
-  --shadow:   0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
-}
-*{ box-sizing:border-box; margin:0; padding:0; }
-body{
-  font-family: 'Reddit Sans', 'Segoe UI', system-ui, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  font-size: 13px;
-}
-
-.hdr{
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 14px 28px;
-  display: flex; align-items: center; justify-content: space-between;
-  box-shadow: var(--shadow);
-}
-.hdr-l{ display:flex; align-items:center; gap:13px; }
-.logo{
-  background: linear-gradient(135deg, #222A9C, #7BA0FF);
-  border-radius: 8px; padding: 7px 13px;
-  font-weight: 800; font-size: 13px; letter-spacing: 1.5px; color: #fff;
-}
-.hdr-title{ font-size: 16px; font-weight: 700; color: var(--text); }
-.hdr-sub{ font-size: 11px; color: var(--text2); margin-top: 1px; }
-
-.ctrl{
-  background: var(--surface);
-  border-bottom: 2px solid var(--border);
-  padding: 10px 28px;
-  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
-}
-.ctrl-label{ font-size:10px; text-transform:uppercase; letter-spacing:1px; font-weight:700; color:var(--text3); }
-.period-btns{ display:flex; gap:4px; }
-.pbtn{
-  padding: 5px 15px; font-size: 12px; font-weight: 600;
-  border-radius: 6px; border: 1.5px solid var(--border2);
-  background: transparent; color: var(--text2);
-  cursor: pointer; transition: all .15s; font-family: inherit;
-}
-.pbtn:hover{ border-color: var(--M); color: var(--M); }
-.pbtn.active{ background: var(--M); border-color: var(--M); color: #fff; }
-.period-info{ font-size:11px; color:var(--text2); }
-.period-info span{ color:var(--text); font-weight:600; }
-.export-btn{
-  padding: 5px 14px; font-size: 11px; font-weight: 700;
-  border-radius: 6px; border: 1.5px solid #08AF56;
-  background: transparent; color: #08AF56;
-  cursor: pointer; transition: all .15s; font-family: inherit;
-  letter-spacing: 0.2px;
-}
-.export-btn:hover{ background: #08AF56; color: #fff; }
-.note-chip{
-  background: #EBF3FB; border: 1px solid #A8CDE8;
-  border-radius: 5px; padding: 3px 10px;
-  font-size: 10px; color: #222A9C; font-weight: 600; white-space: nowrap;
-}
-.legend{ display:flex; gap:16px; margin-left:auto; }
-.leg{ display:flex; align-items:center; gap:7px; font-size:12px; font-weight:600; }
-.leg-dot{ width:10px; height:10px; border-radius:50%; }
-
-.main{
-  padding: 22px 28px;
-  max-width: 1440px; margin: 0 auto;
-  display: flex; flex-direction: column; gap: 20px;
-}
-
-.section{
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-.sec-hdr{
-  padding: 14px 18px 0;
-  border-bottom: 1px solid var(--border);
-}
-.sec-title-row{
-  display: flex; align-items: center; gap: 10px;
-  margin-bottom: 11px; flex-wrap: wrap;
-}
-.sec-num{
-  font-size: 10px; font-weight: 700; color: var(--text3);
-  text-transform: uppercase; letter-spacing: 1px;
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 4px; padding: 2px 7px; white-space: nowrap;
-}
-.sec-name{ font-size: 13px; font-weight: 700; color: var(--text); }
-.sec-desc{ font-size: 10px; color: var(--text3); margin-left: auto; }
-
-.ltabs{ display:flex; }
-.ltab{
-  padding: 8px 18px; font-size: 11px; font-weight: 600;
-  cursor: pointer; border: none; background: transparent;
-  color: var(--text2); border-bottom: 2px solid transparent;
-  transition: all .15s; white-space: nowrap; font-family: inherit;
-}
-.ltab:hover{ color: var(--text); }
-.ltab.active{ color: var(--M); border-bottom-color: var(--M); }
-
-.sec-body{ padding: 18px; }
-.chart-wrap{ position:relative; height:270px; width:100%; }
-
-table{ width:100%; border-collapse:collapse; font-size:12px; }
-thead th{
-  background: var(--surface2); color: var(--text2);
-  font-weight: 600; font-size: 10px; text-transform: uppercase;
-  letter-spacing: .4px; padding: 9px 12px; text-align: right;
-  border-bottom: 1px solid var(--border); white-space: nowrap; font-family: inherit;
-}
-thead th.lft{ text-align:left; }
-thead tr.sh th{ font-size:11px; font-weight:700; padding:8px 12px; }
-thead tr.sh th.mh{ color:#fff; background: var(--M); }
-thead tr.sh th.ah{ color:#fff; background: var(--A); }
-thead tr.sh th.eh{ color:#fff; background: var(--E); }
-tbody td{
-  padding: 8px 12px; border-bottom: 1px solid var(--border);
-  text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums;
-}
-tbody td.lft{ text-align:left; font-weight:600; color:var(--text); }
-tbody tr:last-child td{ border-bottom:none; }
-tbody tr:hover td{ background: var(--surface2); }
-tbody tr.tot td{ background: var(--surface3); font-weight:700; border-top:1px solid var(--border2); }
-tbody tr.tot td.lft{ color:var(--text2); font-size:10px; text-transform:uppercase; letter-spacing:.5px; }
-.vg{ color:var(--gain); font-weight:600; }
-.vl{ color:var(--loss); font-weight:600; }
-.vn{ color:var(--text2); }
-td.na{ color:var(--text3); font-style:italic; }
-
-.footer{
-  padding: 12px 28px; font-size: 10px; color: var(--text3);
-  border-top: 1px solid var(--border);
-  display: flex; justify-content: space-between; flex-wrap: wrap; gap:4px;
-  background: var(--surface);
-}
+:root{--bg:#FAF8F4;--surface:#FFFFFF;--surface2:#F4F0E8;--surface3:#EDE8DF;--border:#E2D9CC;--border2:#CEC4B4;--text:#1C1917;--text2:#6B6460;--text3:#A89F96;--gain:#16A34A;--loss:#DC2626;--M:#222A9C;--A:#FFC000;--E:#7BA0FF;--r:10px;--shadow:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Reddit Sans','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;}
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);}
+.hdr-l{display:flex;align-items:center;gap:13px;}
+.logo{background:linear-gradient(135deg,#222A9C,#7BA0FF);border-radius:8px;padding:7px 13px;font-weight:800;font-size:13px;letter-spacing:1.5px;color:#fff;}
+.hdr-title{font-size:16px;font-weight:700;color:var(--text);}
+.hdr-sub{font-size:11px;color:var(--text2);margin-top:1px;}
+.ctrl{background:var(--surface);border-bottom:2px solid var(--border);padding:10px 28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.ctrl-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:var(--text3);}
+.period-btns{display:flex;gap:4px;}
+.pbtn{padding:5px 15px;font-size:12px;font-weight:600;border-radius:6px;border:1.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;font-family:inherit;}
+.pbtn:hover{border-color:var(--M);color:var(--M);}
+.pbtn.active{background:var(--M);border-color:var(--M);color:#fff;}
+.period-info{font-size:11px;color:var(--text2);}
+.period-info span{color:var(--text);font-weight:600;}
+.note-chip{background:#EBF3FB;border:1px solid #A8CDE8;border-radius:5px;padding:3px 10px;font-size:10px;color:#222A9C;font-weight:600;white-space:nowrap;}
+.legend{display:flex;gap:16px;margin-left:auto;}
+.leg{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;}
+.leg-dot{width:10px;height:10px;border-radius:50%;}
+.main{padding:22px 28px;max-width:1440px;margin:0 auto;display:flex;flex-direction:column;gap:20px;}
+.section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);}
+.sec-hdr{padding:14px 18px 0;border-bottom:1px solid var(--border);}
+.sec-title-row{display:flex;align-items:center;gap:10px;margin-bottom:11px;flex-wrap:wrap;}
+.sec-num{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 7px;white-space:nowrap;}
+.sec-name{font-size:13px;font-weight:700;color:var(--text);}
+.sec-desc{font-size:10px;color:var(--text3);margin-left:auto;}
+.ltabs{display:flex;}
+.ltab{padding:8px 18px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text2);border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;font-family:inherit;}
+.ltab:hover{color:var(--text);}
+.ltab.active{color:var(--M);border-bottom-color:var(--M);}
+.sec-body{padding:18px;}
+.chart-wrap{position:relative;height:270px;width:100%;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{background:var(--surface2);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.4px;padding:9px 12px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;font-family:inherit;}
+thead th.lft{text-align:left;}
+thead tr.sh th{font-size:11px;font-weight:700;padding:8px 12px;}
+thead tr.sh th.mh{color:#fff;background:var(--M);}
+thead tr.sh th.ah{color:#fff;background:var(--A);}
+thead tr.sh th.eh{color:#fff;background:var(--E);}
+tbody td{padding:8px 12px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;}
+tbody td.lft{text-align:left;font-weight:600;color:var(--text);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:var(--surface2);}
+tbody tr.tot td{background:var(--surface3);font-weight:700;border-top:1px solid var(--border2);}
+tbody tr.tot td.lft{color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:.5px;}
+.vg{color:var(--gain);font-weight:600;}
+.vl{color:var(--loss);font-weight:600;}
+.vn{color:var(--text2);}
+td.na{color:var(--text3);font-style:italic;}
+.footer{padding:12px 28px;font-size:10px;color:var(--text3);border-top:1px solid var(--border);display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;background:var(--surface);}
 </style>
 </head>
 <body>
-
-<div class="hdr">
-  <div class="hdr-l">
-    <div class="logo">ALLOCATE</div>
-    <div>
-      <div class="hdr-title">Attribution Analysis Dashboard</div>
-      <div class="hdr-sub">Ionic Allocate PMS &nbsp;&mdash;&nbsp; Schemes 9 &middot; 10 &middot; 11</div>
-    </div>
-  </div>
-</div>
-
+<div class="hdr"><div class="hdr-l"><div class="logo">ALLOCATE</div><div><div class="hdr-title">Attribution Analysis Dashboard</div><div class="hdr-sub">Ionic Allocate PMS &nbsp;&mdash;&nbsp; Schemes 9 &middot; 10 &middot; 11</div></div></div></div>
 <div class="ctrl">
   <span class="ctrl-label">Period</span>
   <div class="period-btns">
-    <button class="pbtn active" onclick="setPeriod('MTD')" id="pbtn-MTD">MTD</button>
-    <button class="pbtn" onclick="setPeriod('1M')" id="pbtn-1M">1M</button>
-    <button class="pbtn" onclick="setPeriod('SI')" id="pbtn-SI">Since Inception</button>
+    <button class="pbtn active" onclick="setPeriod('MTD')">MTD</button>
+    <button class="pbtn" onclick="setPeriod('1M')">1M</button>
+    <button class="pbtn" onclick="setPeriod('SI')">Since Inception</button>
   </div>
   <div class="period-info">Period: <span id="period-str">—</span></div>
   <div class="note-chip">Equity (11): Fixed Income &amp; Alternates excluded</div>
-  <button class="export-btn" onclick="exportToExcel()" title="Export current period data to Excel">&#8681; Export Excel</button>
   <div class="legend">
     <div class="leg"><div class="leg-dot" style="background:var(--M)"></div>Moderate (9)</div>
     <div class="leg"><div class="leg-dot" style="background:var(--A)"></div>Aggressive (10)</div>
     <div class="leg"><div class="leg-dot" style="background:var(--E)"></div>Equity (11)</div>
   </div>
 </div>
-
 <div class="main">
-
-  <div class="section">
-    <div class="sec-hdr">
-      <div class="sec-title-row">
-        <span class="sec-num">Section 1</span>
-        <span class="sec-name">% Contribution to Portfolio Return — Chart</span>
-        <span class="sec-desc">Sum of Contribution column from CA file, grouped by bucket</span>
-      </div>
-      <div class="ltabs" id="t1">
-        <button class="ltab active" onclick="setLevel(1,'asset_class')">Asset Class</button>
-        <button class="ltab" onclick="setLevel(1,'category')">Category</button>
-        <button class="ltab" onclick="setLevel(1,'instrument')">Instrument</button>
-      </div>
-    </div>
-    <div class="sec-body"><div class="chart-wrap"><canvas id="c1"></canvas></div></div>
-  </div>
-
-  <div class="section">
-    <div class="sec-hdr">
-      <div class="sec-title-row">
-        <span class="sec-num">Section 2</span>
-        <span class="sec-name">% Contribution to Portfolio Return — Table</span>
-        <span class="sec-desc">All values in % — 2 decimal places</span>
-      </div>
-      <div class="ltabs" id="t2">
-        <button class="ltab active" onclick="setLevel(2,'asset_class')">Asset Class</button>
-        <button class="ltab" onclick="setLevel(2,'category')">Category</button>
-        <button class="ltab" onclick="setLevel(2,'instrument')">Instrument</button>
-      </div>
-    </div>
-    <div class="sec-body" id="b2"></div>
-  </div>
-
-  <div class="section">
-    <div class="sec-hdr">
-      <div class="sec-title-row">
-        <span class="sec-num">Section 3</span>
-        <span class="sec-name">% Attribution of Total Return — Chart</span>
-        <span class="sec-desc">Bucket Gain &divide; Portfolio Total Gain &times; 100</span>
-      </div>
-      <div class="ltabs" id="t3">
-        <button class="ltab active" onclick="setLevel(3,'asset_class')">Asset Class</button>
-        <button class="ltab" onclick="setLevel(3,'category')">Category</button>
-        <button class="ltab" onclick="setLevel(3,'instrument')">Instrument</button>
-      </div>
-    </div>
-    <div class="sec-body"><div class="chart-wrap"><canvas id="c3"></canvas></div></div>
-  </div>
-
-  <div class="section">
-    <div class="sec-hdr">
-      <div class="sec-title-row">
-        <span class="sec-num">Section 4</span>
-        <span class="sec-name">% Attribution of Total Return — Table</span>
-        <span class="sec-desc">All values in % — 2 decimal places</span>
-      </div>
-      <div class="ltabs" id="t4">
-        <button class="ltab active" onclick="setLevel(4,'asset_class')">Asset Class</button>
-        <button class="ltab" onclick="setLevel(4,'category')">Category</button>
-        <button class="ltab" onclick="setLevel(4,'instrument')">Instrument</button>
-      </div>
-    </div>
-    <div class="sec-body" id="b4"></div>
-  </div>
-
-  <div class="section">
-    <div class="sec-hdr">
-      <div class="sec-title-row">
-        <span class="sec-num">Section 5</span>
-        <span class="sec-name">% Absolute Returns by Bucket — Chart</span>
-        <span class="sec-desc">Bucket Gain &divide; Bucket Ending Market Value &times; 100</span>
-      </div>
-      <div class="ltabs" id="t5">
-        <button class="ltab active" onclick="setLevel(5,'asset_class')">Asset Class</button>
-        <button class="ltab" onclick="setLevel(5,'category')">Category</button>
-        <button class="ltab" onclick="setLevel(5,'instrument')">Instrument</button>
-      </div>
-    </div>
-    <div class="sec-body"><div class="chart-wrap"><canvas id="c5"></canvas></div></div>
-  </div>
-
-  <div class="section">
-    <div class="sec-hdr">
-      <div class="sec-title-row">
-        <span class="sec-num">Section 6</span>
-        <span class="sec-name">% Absolute Returns by Bucket — Table</span>
-        <span class="sec-desc">All values in % — 2 decimal places</span>
-      </div>
-      <div class="ltabs" id="t6">
-        <button class="ltab active" onclick="setLevel(6,'asset_class')">Asset Class</button>
-        <button class="ltab" onclick="setLevel(6,'category')">Category</button>
-        <button class="ltab" onclick="setLevel(6,'instrument')">Instrument</button>
-      </div>
-    </div>
-    <div class="sec-body" id="b6"></div>
-  </div>
-
+  <div class="section"><div class="sec-hdr"><div class="sec-title-row"><span class="sec-num">Section 1</span><span class="sec-name">% Contribution to Portfolio Return — Chart</span><span class="sec-desc">Sum of Contribution column from CA file, grouped by bucket</span></div><div class="ltabs" id="t1"><button class="ltab active" onclick="setLevel(1,'asset_class')">Asset Class</button><button class="ltab" onclick="setLevel(1,'category')">Category</button><button class="ltab" onclick="setLevel(1,'instrument')">Instrument</button></div></div><div class="sec-body"><div class="chart-wrap"><canvas id="c1"></canvas></div></div></div>
+  <div class="section"><div class="sec-hdr"><div class="sec-title-row"><span class="sec-num">Section 2</span><span class="sec-name">% Contribution to Portfolio Return — Table</span><span class="sec-desc">All values in % — 2 decimal places</span></div><div class="ltabs" id="t2"><button class="ltab active" onclick="setLevel(2,'asset_class')">Asset Class</button><button class="ltab" onclick="setLevel(2,'category')">Category</button><button class="ltab" onclick="setLevel(2,'instrument')">Instrument</button></div></div><div class="sec-body" id="b2"></div></div>
+  <div class="section"><div class="sec-hdr"><div class="sec-title-row"><span class="sec-num">Section 3</span><span class="sec-name">% Attribution of Total Return — Chart</span><span class="sec-desc">Bucket Gain &divide; Portfolio Total Gain &times; 100</span></div><div class="ltabs" id="t3"><button class="ltab active" onclick="setLevel(3,'asset_class')">Asset Class</button><button class="ltab" onclick="setLevel(3,'category')">Category</button><button class="ltab" onclick="setLevel(3,'instrument')">Instrument</button></div></div><div class="sec-body"><div class="chart-wrap"><canvas id="c3"></canvas></div></div></div>
+  <div class="section"><div class="sec-hdr"><div class="sec-title-row"><span class="sec-num">Section 4</span><span class="sec-name">% Attribution of Total Return — Table</span><span class="sec-desc">All values in % — 2 decimal places</span></div><div class="ltabs" id="t4"><button class="ltab active" onclick="setLevel(4,'asset_class')">Asset Class</button><button class="ltab" onclick="setLevel(4,'category')">Category</button><button class="ltab" onclick="setLevel(4,'instrument')">Instrument</button></div></div><div class="sec-body" id="b4"></div></div>
+  <div class="section"><div class="sec-hdr"><div class="sec-title-row"><span class="sec-num">Section 5</span><span class="sec-name">% Absolute Returns by Bucket — Chart</span><span class="sec-desc">(Realized + Unrealized + Income) &divide; (Beginning MV + Purchases)</span></div><div class="ltabs" id="t5"><button class="ltab active" onclick="setLevel(5,'asset_class')">Asset Class</button><button class="ltab" onclick="setLevel(5,'category')">Category</button><button class="ltab" onclick="setLevel(5,'instrument')">Instrument</button></div></div><div class="sec-body"><div class="chart-wrap"><canvas id="c5"></canvas></div></div></div>
+  <div class="section"><div class="sec-hdr"><div class="sec-title-row"><span class="sec-num">Section 6</span><span class="sec-name">% Absolute Returns by Bucket — Table</span><span class="sec-desc">(Realized + Unrealized + Income) &divide; (Beginning MV + Purchases) &nbsp;&middot;&nbsp; All values in %</span></div><div class="ltabs" id="t6"><button class="ltab active" onclick="setLevel(6,'asset_class')">Asset Class</button><button class="ltab" onclick="setLevel(6,'category')">Category</button><button class="ltab" onclick="setLevel(6,'instrument')">Instrument</button></div></div><div class="sec-body" id="b6"></div></div>
 </div>
-
-<div class="footer">
-  <div>Ionic Allocate PMS &nbsp;·&nbsp; Moderate (9) · Aggressive (10) · Equity (11) &nbsp;·&nbsp; Equity (11) excludes Fixed Income &amp; Alternates &nbsp;·&nbsp; For Internal Use Only</div>
-  <div>Contribution = sum from CA file &nbsp;|&nbsp; Attribution = Bucket Gain ÷ Portfolio Total Gain &nbsp;|&nbsp; Abs Return = Bucket Gain ÷ Bucket Ending MV</div>
-</div>
-
+<div class="footer"><div>Ionic Allocate PMS &nbsp;·&nbsp; Moderate (9) · Aggressive (10) · Equity (11) &nbsp;·&nbsp; Equity (11) excludes Fixed Income &amp; Alternates &nbsp;·&nbsp; For Internal Use Only</div><div>Contribution = sum from CA file &nbsp;|&nbsp; Attribution = Bucket Gain ÷ Portfolio Total Gain &nbsp;|&nbsp; Abs Return = (Realized + Unrealized + Income) ÷ (Beginning MV + Purchases)</div></div>
 <script>
-const D = {"schemes":["Moderate (9)","Aggressive (10)","Equity (11)"],"periods":["MTD","1M","SI"],"all_keys":{"asset_class":["Alternates","Equity","Fixed Income","Liquid"],"category":["Commodities","Corporate Bonds","Domestic Equity","ESS","InVITs","International Equity","Liquid"],"instrument":["China","Corporate Bonds","Direct Equity","ESS","Emerging Market","Factor","Flexi Cap","Gold","InVITs","Large Cap","Liquid","Mid Cap","Silver","Small Cap","Tactical","USA"]},"data":{"SI":{"label":"Since Inception","period":"01 Mar 2025 \u2013 20 Mar 2026","schemes":{"Moderate (9)":{"summary":{"total_gain":2416395,"total_mv":339213326,"total_contrib":23.25,"sec_count":102},"agg":{"asset_class":{"Equity":{"contribution":1.71,"attribution":-401.9129,"abs_return":-6.3492,"total_gain":-9711804,"ending_mv":152960023,"realized":216003,"unrealized":-9927807},"Fixed Income":{"contribution":2.21,"attribution":9.3059,"abs_return":0.3897,"total_gain":224867,"ending_mv":57709637,"realized":29966,"unrealized":194901},"Alternates":{"contribution":18.92,"attribution":484.813,"abs_return":12.3533,"total_gain":11714996,"ending_mv":94833278,"realized":7808632,"unrealized":3906364},"Liquid":{"contribution":0.41,"attribution":7.7941,"abs_return":0.5587,"total_gain":188336,"ending_mv":33710388,"realized":130639,"unrealized":57697}},"category":{"Domestic Equity":{"contribution":-0.46,"attribution":-399.94,"abs_return":-8.2274,"total_gain":-9664131,"ending_mv":117462395,"realized":216003,"unrealized":-9880134},"Corporate Bonds":{"contribution":2.3,"attribution":20.9707,"abs_return":1.358,"total_gain":506734,"ending_mv":37315481,"realized":29966,"unrealized":476768},"International Equity":{"contribution":2.17,"attribution":-1.9729,"abs_return":-0.1343,"total_gain":-47673,"ending_mv":35497628,"realized":0,"unrealized":-47673},"ESS":{"contribution":-0.09,"attribution":-11.6648,"abs_return":-1.3821,"total_gain":-281867,"ending_mv":20394156,"realized":0,"unrealized":-281867},"InVITs":{"contribution":1.11,"attribution":25.4523,"abs_return":1.7779,"total_gain":615028,"ending_mv":34593236,"realized":0,"unrealized":615028},"Commodities":{"contribution":17.81,"attribution":459.3607,"abs_return":18.4262,"total_gain":11099968,"ending_mv":60240042,"realized":7808632,"unrealized":3291336},"Liquid":{"contribution":0.41,"attribution":7.7941,"abs_return":0.5587,"total_gain":188336,"ending_mv":33710388,"realized":130639,"unrealized":57697}},"instrument":{"Direct Equity":{"contribution":0.16,"attribution":-115.0,"abs_return":-9.9203,"total_gain":-2778854,"ending_mv":28011900,"realized":-11989,"unrealized":-2766865},"Corporate Bonds":{"contribution":2.3,"attribution":20.9707,"abs_return":1.358,"total_gain":506734,"ending_mv":37315481,"realized":29966,"unrealized":476768},"Tactical":{"contribution":-0.02,"attribution":-20.3974,"abs_return":-2.8924,"total_gain":-492881,"ending_mv":17040324,"realized":0,"unrealized":-492881},"Flexi Cap":{"contribution":0.12,"attribution":-91.5376,"abs_return":-8.3249,"total_gain":-2211910,"ending_mv":26569720,"realized":0,"unrealized":-2211910},"Factor":{"contribution":-0.42,"attribution":-140.0772,"abs_return":-9.3642,"total_gain":-3384819,"ending_mv":36146440,"realized":152213,"unrealized":-3537032},"Large Cap":{"contribution":-0.08,"attribution":-11.3767,"abs_return":-10.058,"total_gain":-274906,"ending_mv":2733213,"realized":28849,"unrealized":-303755},"Mid Cap":{"contribution":-0.09,"attribution":-10.795,"abs_return":-6.4389,"total_gain":-260850,"ending_mv":4051132,"realized":46930,"unrealized":-307780},"Small Cap":{"contribution":-0.13,"attribution":-10.7561,"abs_return":-8.9327,"total_gain":-259911,"ending_mv":2909666,"realized":0,"unrealized":-259911},"China":{"contribution":1.52,"attribution":11.8632,"abs_return":2.1836,"total_gain":286661,"ending_mv":13128090,"realized":0,"unrealized":286661},"USA":{"contribution":0.68,"attribution":-9.5509,"abs_return":-1.2384,"total_gain":-230787,"ending_mv":18635161,"realized":0,"unrealized":-230787},"Emerging Market":{"contribution":-0.03,"attribution":-4.2852,"abs_return":-2.7728,"total_gain":-103547,"ending_mv":3734377,"realized":0,"unrealized":-103547},"ESS":{"contribution":-0.09,"attribution":-11.6648,"abs_return":-1.3821,"total_gain":-281867,"ending_mv":20394156,"realized":0,"unrealized":-281867},"InVITs":{"contribution":1.11,"attribution":25.4523,"abs_return":1.7779,"total_gain":615028,"ending_mv":34593236,"realized":0,"unrealized":615028},"Silver":{"contribution":12.93,"attribution":376.0379,"abs_return":81.4024,"total_gain":9086560,"ending_mv":11162521,"realized":7808632,"unrealized":1277928},"Gold":{"contribution":4.88,"attribution":83.3228,"abs_return":4.1025,"total_gain":2013408,"ending_mv":49077521,"realized":0,"unrealized":2013408},"Liquid":{"contribution":0.41,"attribution":7.7941,"abs_return":0.5587,"total_gain":188336,"ending_mv":33710388,"realized":130639,"unrealized":57697}}}},"Aggressive (10)":{"summary":{"total_gain":-8935385,"total_mv":849545695,"total_contrib":14.39,"sec_count":120},"agg":{"asset_class":{"Equity":{"contribution":4.28,"attribution":406.8729,"abs_return":-5.8379,"total_gain":-36355661,"ending_mv":622748364,"realized":-229155,"unrealized":-36126506},"Fixed Income":{"contribution":0.53,"attribution":0.6598,"abs_return":-0.2328,"total_gain":-58957,"ending_mv":25321948,"realized":55587,"unrealized":-114544},"Alternates":{"contribution":9.17,"attribution":-301.0803,"abs_return":21.1371,"total_gain":26902684,"ending_mv":127277016,"realized":15529561,"unrealized":11373123},"Liquid":{"contribution":0.41,"attribution":-6.4524,"abs_return":0.777,"total_gain":576549,"ending_mv":74198367,"realized":448956,"unrealized":127593}},"category":{"Domestic Equity":{"contribution":1.67,"attribution":426.2514,"abs_return":-8.1947,"total_gain":-38087206,"ending_mv":464779389,"realized":-229155,"unrealized":-37858051},"Corporate Bonds":{"contribution":0.54,"attribution":-0.6726,"abs_return":0.3474,"total_gain":60098,"ending_mv":17299923,"realized":58304,"unrealized":1794},"International Equity":{"contribution":2.61,"attribution":-19.3785,"abs_return":1.0961,"total_gain":1731545,"ending_mv":157968975,"realized":0,"unrealized":1731545},"ESS":{"contribution":-0.01,"attribution":1.3324,"abs_return":-1.4841,"total_gain":-119055,"ending_mv":8022025,"realized":-2717,"unrealized":-116338},"InVITs":{"contribution":0.83,"attribution":-23.8502,"abs_return":4.6727,"total_gain":2131104,"ending_mv":45607214,"realized":0,"unrealized":2131104},"Commodities":{"contribution":8.34,"attribution":-277.2301,"abs_return":30.3314,"total_gain":24771580,"ending_mv":81669802,"realized":15529561,"unrealized":9242019},"Liquid":{"contribution":0.41,"attribution":-6.4524,"abs_return":0.777,"total_gain":576549,"ending_mv":74198367,"realized":448956,"unrealized":127593}},"instrument":{"Direct Equity":{"contribution":1.11,"attribution":141.0774,"abs_return":-11.9685,"total_gain":-12605808,"ending_mv":105324701,"realized":-1364062,"unrealized":-11241746},"Corporate Bonds":{"contribution":0.54,"attribution":-0.6726,"abs_return":0.3474,"total_gain":60098,"ending_mv":17299923,"realized":58304,"unrealized":1794},"Tactical":{"contribution":-0.03,"attribution":15.9515,"abs_return":-1.6469,"total_gain":-1425328,"ending_mv":86547138,"realized":-177751,"unrealized":-1247577},"Flexi Cap":{"contribution":0.82,"attribution":101.7669,"abs_return":-8.1711,"total_gain":-9093264,"ending_mv":111285098,"realized":0,"unrealized":-9093264},"Factor":{"contribution":0.05,"attribution":138.2346,"abs_return":-9.5618,"total_gain":-12351793,"ending_mv":129178502,"realized":1035200,"unrealized":-13386993},"Large Cap":{"contribution":0.05,"attribution":-1.2303,"abs_return":0.0,"total_gain":109933,"ending_mv":0,"realized":109933,"unrealized":0},"Mid Cap":{"contribution":-0.08,"attribution":9.1732,"abs_return":-6.9455,"total_gain":-819657,"ending_mv":11801259,"realized":167525,"unrealized":-987182},"Small Cap":{"contribution":-0.25,"attribution":21.2782,"abs_return":-9.2105,"total_gain":-1901289,"ending_mv":20642691,"realized":0,"unrealized":-1901289},"China":{"contribution":2.17,"attribution":-33.0897,"abs_return":4.2909,"total_gain":2956688,"ending_mv":68905416,"realized":0,"unrealized":2956688},"USA":{"contribution":0.45,"attribution":12.8673,"abs_return":-1.3477,"total_gain":-1149745,"ending_mv":85313875,"realized":0,"unrealized":-1149745},"Emerging Market":{"contribution":-0.01,"attribution":0.8438,"abs_return":-2.0108,"total_gain":-75398,"ending_mv":3749684,"realized":0,"unrealized":-75398},"ESS":{"contribution":-0.01,"attribution":1.3324,"abs_return":-1.4841,"total_gain":-119055,"ending_mv":8022025,"realized":-2717,"unrealized":-116338},"InVITs":{"contribution":0.83,"attribution":-23.8502,"abs_return":4.6727,"total_gain":2131104,"ending_mv":45607214,"realized":0,"unrealized":2131104},"Gold":{"contribution":2.81,"attribution":-63.7364,"abs_return":8.8839,"total_gain":5695097,"ending_mv":64105978,"realized":63154,"unrealized":5631943},"Silver":{"contribution":5.53,"attribution":-213.4937,"abs_return":108.6124,"total_gain":19076483,"ending_mv":17563824,"realized":15466407,"unrealized":3610076},"Liquid":{"contribution":0.41,"attribution":-6.4524,"abs_return":0.777,"total_gain":576549,"ending_mv":74198367,"realized":448956,"unrealized":127593}}}},"Equity (11)":{"summary":{"total_gain":-3570899,"total_mv":496755319,"total_contrib":3.66,"sec_count":55},"agg":{"asset_class":{"Equity":{"contribution":2.9,"attribution":127.8548,"abs_return":-0.9384,"total_gain":-4565567,"ending_mv":486508431,"realized":4129014,"unrealized":-8694581},"Liquid":{"contribution":0.76,"attribution":-27.8548,"abs_return":9.707,"total_gain":994668,"ending_mv":10246888,"realized":975362,"unrealized":19306}},"category":{"Domestic Equity":{"contribution":0.14,"attribution":443.6719,"abs_return":-4.3935,"total_gain":-15843077,"ending_mv":360606106,"realized":4074060,"unrealized":-19917137},"International Equity":{"contribution":2.76,"attribution":-315.8171,"abs_return":8.9573,"total_gain":11277510,"ending_mv":125902325,"realized":54954,"unrealized":11222556},"Liquid":{"contribution":0.76,"attribution":-27.8548,"abs_return":9.707,"total_gain":994668,"ending_mv":10246888,"realized":975362,"unrealized":19306}},"instrument":{"Direct Equity":{"contribution":0.21,"attribution":-8.6533,"abs_return":0.0,"total_gain":308999,"ending_mv":0,"realized":308999,"unrealized":0},"Tactical":{"contribution":0.03,"attribution":-12.6938,"abs_return":0.6796,"total_gain":453281,"ending_mv":66697703,"realized":29383,"unrealized":423898},"Factor":{"contribution":-0.11,"attribution":141.0917,"abs_return":-5.8294,"total_gain":-5038242,"ending_mv":86428401,"realized":3177748,"unrealized":-8215990},"Mid Cap":{"contribution":0.26,"attribution":88.699,"abs_return":-5.6508,"total_gain":-3167350,"ending_mv":56050934,"realized":77570,"unrealized":-3244920},"Flexi Cap":{"contribution":-0.19,"attribution":226.1547,"abs_return":-5.6467,"total_gain":-8075756,"ending_mv":143017713,"realized":32497,"unrealized":-8108253},"Large Cap":{"contribution":0.08,"attribution":-12.4812,"abs_return":0.0,"total_gain":445691,"ending_mv":0,"realized":445691,"unrealized":0},"Small Cap":{"contribution":-0.14,"attribution":21.5548,"abs_return":-9.1507,"total_gain":-769700,"ending_mv":8411355,"realized":2172,"unrealized":-771872},"China":{"contribution":2.24,"attribution":-288.6111,"abs_return":16.1402,"total_gain":10306010,"ending_mv":63852942,"realized":39925,"unrealized":10266085},"USA":{"contribution":0.53,"attribution":-28.1065,"abs_return":1.6298,"total_gain":1003656,"ending_mv":61581528,"realized":15029,"unrealized":988627},"Emerging Market":{"contribution":-0.01,"attribution":0.9005,"abs_return":-6.8731,"total_gain":-32156,"ending_mv":467855,"realized":0,"unrealized":-32156},"Liquid":{"contribution":0.76,"attribution":-27.8548,"abs_return":9.707,"total_gain":994668,"ending_mv":10246888,"realized":975362,"unrealized":19306}}}}}},"MTD":{"label":"MTD","period":"01 Mar 2026 \u2013 20 Mar 2026","schemes":{"Moderate (9)":{"summary":{"total_gain":-16400532,"total_mv":339213326,"total_contrib":-4.87,"sec_count":77},"agg":{"asset_class":{"Equity":{"contribution":-3.23,"attribution":64.3123,"abs_return":-6.8956,"total_gain":-10547553,"ending_mv":152960023,"realized":0,"unrealized":-10547553},"Fixed Income":{"contribution":0.12,"attribution":-1.3062,"abs_return":0.3712,"total_gain":214220,"ending_mv":57709637,"realized":0,"unrealized":214220},"Alternates":{"contribution":-1.77,"attribution":37.2025,"abs_return":-6.4338,"total_gain":-6101411,"ending_mv":94833278,"realized":0,"unrealized":-6101411},"Liquid":{"contribution":0.01,"attribution":-0.2086,"abs_return":0.1015,"total_gain":34212,"ending_mv":33710388,"realized":15867,"unrealized":18345}},"category":{"Domestic Equity":{"contribution":-2.94,"attribution":58.3546,"abs_return":-8.1477,"total_gain":-9570460,"ending_mv":117462395,"realized":0,"unrealized":-9570460},"International Equity":{"contribution":-0.29,"attribution":5.9577,"abs_return":-2.7526,"total_gain":-977093,"ending_mv":35497628,"realized":0,"unrealized":-977093},"ESS":{"contribution":-0.07,"attribution":1.4369,"abs_return":-1.1555,"total_gain":-235657,"ending_mv":20394156,"realized":0,"unrealized":-235657},"Corporate Bonds":{"contribution":0.19,"attribution":-2.7431,"abs_return":1.2056,"total_gain":449877,"ending_mv":37315481,"realized":0,"unrealized":449877},"InVITs":{"contribution":-0.03,"attribution":0.567,"abs_return":-0.2688,"total_gain":-92985,"ending_mv":34593236,"realized":0,"unrealized":-92985},"Commodities":{"contribution":-1.74,"attribution":36.6356,"abs_return":-9.9741,"total_gain":-6008426,"ending_mv":60240042,"realized":0,"unrealized":-6008426},"Liquid":{"contribution":0.01,"attribution":-0.2086,"abs_return":0.1015,"total_gain":34212,"ending_mv":33710388,"realized":15867,"unrealized":18345}},"instrument":{"Direct Equity":{"contribution":-0.76,"attribution":14.9528,"abs_return":-8.7546,"total_gain":-2452342,"ending_mv":28011900,"realized":0,"unrealized":-2452342},"Tactical":{"contribution":-0.28,"attribution":5.5763,"abs_return":-5.3669,"total_gain":-914539,"ending_mv":17040324,"realized":0,"unrealized":-914539},"Flexi Cap":{"contribution":-0.66,"attribution":13.1404,"abs_return":-8.1111,"total_gain":-2155095,"ending_mv":26569720,"realized":0,"unrealized":-2155095},"Small Cap":{"contribution":-0.07,"attribution":1.4471,"abs_return":-8.1568,"total_gain":-237337,"ending_mv":2909666,"realized":0,"unrealized":-237337},"Large Cap":{"contribution":-0.08,"attribution":1.5418,"abs_return":-9.2515,"total_gain":-252864,"ending_mv":2733213,"realized":0,"unrealized":-252864},"Mid Cap":{"contribution":-0.09,"attribution":1.7743,"abs_return":-7.1831,"total_gain":-290998,"ending_mv":4051132,"realized":0,"unrealized":-290998},"Factor":{"contribution":-1.0,"attribution":19.9218,"abs_return":-9.039,"total_gain":-3267285,"ending_mv":36146440,"realized":0,"unrealized":-3267285},"Emerging Market":{"contribution":-0.03,"attribution":0.6313,"abs_return":-2.7726,"total_gain":-103539,"ending_mv":3734377,"realized":0,"unrealized":-103539},"USA":{"contribution":-0.06,"attribution":1.2075,"abs_return":-1.0627,"total_gain":-198029,"ending_mv":18635161,"realized":0,"unrealized":-198029},"China":{"contribution":-0.2,"attribution":4.1189,"abs_return":-5.1456,"total_gain":-675525,"ending_mv":13128090,"realized":0,"unrealized":-675525},"ESS":{"contribution":-0.07,"attribution":1.4369,"abs_return":-1.1555,"total_gain":-235657,"ending_mv":20394156,"realized":0,"unrealized":-235657},"Corporate Bonds":{"contribution":0.19,"attribution":-2.7431,"abs_return":1.2056,"total_gain":449877,"ending_mv":37315481,"realized":0,"unrealized":449877},"InVITs":{"contribution":-0.03,"attribution":0.567,"abs_return":-0.2688,"total_gain":-92985,"ending_mv":34593236,"realized":0,"unrealized":-92985},"Silver":{"contribution":-0.48,"attribution":10.0166,"abs_return":-14.7169,"total_gain":-1642776,"ending_mv":11162521,"realized":0,"unrealized":-1642776},"Gold":{"contribution":-1.26,"attribution":26.619,"abs_return":-8.8954,"total_gain":-4365650,"ending_mv":49077521,"realized":0,"unrealized":-4365650},"Liquid":{"contribution":0.01,"attribution":-0.2086,"abs_return":0.1015,"total_gain":34212,"ending_mv":33710388,"realized":15867,"unrealized":18345}}}},"Aggressive (10)":{"summary":{"total_gain":-54281471,"total_mv":849545695,"total_contrib":-6.23,"sec_count":81},"agg":{"asset_class":{"Equity":{"contribution":-5.28,"attribution":84.5675,"abs_return":-7.3713,"total_gain":-45904493,"ending_mv":622748364,"realized":-2783393,"unrealized":-43121100},"Fixed Income":{"contribution":-0.01,"attribution":0.2584,"abs_return":-0.554,"total_gain":-140286,"ending_mv":25321948,"realized":-2717,"unrealized":-137569},"Alternates":{"contribution":-0.95,"attribution":15.3004,"abs_return":-6.5254,"total_gain":-8305290,"ending_mv":127277016,"realized":0,"unrealized":-8305290},"Liquid":{"contribution":0.01,"attribution":-0.1264,"abs_return":0.0925,"total_gain":68598,"ending_mv":74198367,"realized":58685,"unrealized":9913}},"category":{"Domestic Equity":{"contribution":-4.77,"attribution":76.1941,"abs_return":-8.8987,"total_gain":-41359253,"ending_mv":464779389,"realized":-2783393,"unrealized":-38575860},"International Equity":{"contribution":-0.51,"attribution":8.3735,"abs_return":-2.8773,"total_gain":-4545240,"ending_mv":157968975,"realized":0,"unrealized":-4545240},"ESS":{"contribution":-0.01,"attribution":0.1807,"abs_return":-1.2225,"total_gain":-98067,"ending_mv":8022025,"realized":-2717,"unrealized":-95350},"Corporate Bonds":{"contribution":0.0,"attribution":0.0778,"abs_return":-0.244,"total_gain":-42219,"ending_mv":17299923,"realized":0,"unrealized":-42219},"InVITs":{"contribution":-0.02,"attribution":0.3506,"abs_return":-0.4173,"total_gain":-190328,"ending_mv":45607214,"realized":0,"unrealized":-190328},"Commodities":{"contribution":-0.93,"attribution":14.9498,"abs_return":-9.9363,"total_gain":-8114962,"ending_mv":81669802,"realized":0,"unrealized":-8114962},"Liquid":{"contribution":0.01,"attribution":-0.1264,"abs_return":0.0925,"total_gain":68598,"ending_mv":74198367,"realized":58685,"unrealized":9913}},"instrument":{"Direct Equity":{"contribution":-1.38,"attribution":22.1438,"abs_return":-11.4123,"total_gain":-12019997,"ending_mv":105324701,"realized":-2605642,"unrealized":-9414355},"Tactical":{"contribution":-0.63,"attribution":9.962,"abs_return":-6.2481,"total_gain":-5407509,"ending_mv":86547138,"realized":-177751,"unrealized":-5229758},"Flexi Cap":{"contribution":-1.06,"attribution":17.066,"abs_return":-8.3243,"total_gain":-9263657,"ending_mv":111285098,"realized":0,"unrealized":-9263657},"Mid Cap":{"contribution":-0.11,"attribution":1.7621,"abs_return":-8.1049,"total_gain":-956475,"ending_mv":11801259,"realized":0,"unrealized":-956475},"Small Cap":{"contribution":-0.19,"attribution":3.0118,"abs_return":-7.9198,"total_gain":-1634852,"ending_mv":20642691,"realized":0,"unrealized":-1634852},"Factor":{"contribution":-1.4,"attribution":22.2484,"abs_return":-9.3489,"total_gain":-12076763,"ending_mv":129178502,"realized":0,"unrealized":-12076763},"Emerging Market":{"contribution":-0.01,"attribution":0.1421,"abs_return":-2.0569,"total_gain":-77129,"ending_mv":3749684,"realized":0,"unrealized":-77129},"USA":{"contribution":-0.1,"attribution":1.6917,"abs_return":-1.0764,"total_gain":-918295,"ending_mv":85313875,"realized":0,"unrealized":-918295},"China":{"contribution":-0.4,"attribution":6.5396,"abs_return":-5.1517,"total_gain":-3549816,"ending_mv":68905416,"realized":0,"unrealized":-3549816},"ESS":{"contribution":-0.01,"attribution":0.1807,"abs_return":-1.2225,"total_gain":-98067,"ending_mv":8022025,"realized":-2717,"unrealized":-95350},"Corporate Bonds":{"contribution":0.0,"attribution":0.0778,"abs_return":-0.244,"total_gain":-42219,"ending_mv":17299923,"realized":0,"unrealized":-42219},"InVITs":{"contribution":-0.02,"attribution":0.3506,"abs_return":-0.4173,"total_gain":-190328,"ending_mv":45607214,"realized":0,"unrealized":-190328},"Gold":{"contribution":-0.63,"attribution":10.1092,"abs_return":-8.5599,"total_gain":-5487414,"ending_mv":64105978,"realized":0,"unrealized":-5487414},"Silver":{"contribution":-0.3,"attribution":4.8406,"abs_return":-14.96,"total_gain":-2627548,"ending_mv":17563824,"realized":0,"unrealized":-2627548},"Liquid":{"contribution":0.01,"attribution":-0.1264,"abs_return":0.0925,"total_gain":68598,"ending_mv":74198367,"realized":58685,"unrealized":9913}}}},"Equity (11)":{"summary":{"total_gain":-32999226,"total_mv":496755319,"total_contrib":-6.29,"sec_count":28},"agg":{"asset_class":{"Equity":{"contribution":-6.29,"attribution":100.0138,"abs_return":-6.7838,"total_gain":-33003780,"ending_mv":486508431,"realized":0,"unrealized":-33003780},"Liquid":{"contribution":0.0,"attribution":-0.0138,"abs_return":0.0444,"total_gain":4554,"ending_mv":10246888,"realized":218,"unrealized":4336}},"category":{"Domestic Equity":{"contribution":-5.51,"attribution":87.6264,"abs_return":-8.0187,"total_gain":-28916026,"ending_mv":360606106,"realized":0,"unrealized":-28916026},"International Equity":{"contribution":-0.78,"attribution":12.3874,"abs_return":-3.2468,"total_gain":-4087754,"ending_mv":125902325,"realized":0,"unrealized":-4087754},"Liquid":{"contribution":0.0,"attribution":-0.0138,"abs_return":0.0444,"total_gain":4554,"ending_mv":10246888,"realized":218,"unrealized":4336}},"instrument":{"Tactical":{"contribution":-0.83,"attribution":13.1109,"abs_return":-6.4867,"total_gain":-4326501,"ending_mv":66697703,"realized":0,"unrealized":-4326501},"Direct Equity":{"contribution":0.0,"attribution":-0.0,"abs_return":0.0,"total_gain":0,"ending_mv":0,"realized":0,"unrealized":0},"Small Cap":{"contribution":-0.12,"attribution":2.0437,"abs_return":-8.0179,"total_gain":-674412,"ending_mv":8411355,"realized":0,"unrealized":-674412},"Flexi Cap":{"contribution":-2.06,"attribution":32.6481,"abs_return":-7.5331,"total_gain":-10773628,"ending_mv":143017713,"realized":0,"unrealized":-10773628},"Mid Cap":{"contribution":-0.91,"attribution":14.5537,"abs_return":-8.5683,"total_gain":-4802602,"ending_mv":56050934,"realized":0,"unrealized":-4802602},"Factor":{"contribution":-1.59,"attribution":25.2699,"abs_return":-9.6483,"total_gain":-8338883,"ending_mv":86428401,"realized":0,"unrealized":-8338883},"Emerging Market":{"contribution":-0.01,"attribution":0.0974,"abs_return":-6.8731,"total_gain":-32156,"ending_mv":467855,"realized":0,"unrealized":-32156},"USA":{"contribution":-0.15,"attribution":2.1676,"abs_return":-1.1615,"total_gain":-715290,"ending_mv":61581528,"realized":0,"unrealized":-715290},"China":{"contribution":-0.62,"attribution":10.1224,"abs_return":-5.2313,"total_gain":-3340308,"ending_mv":63852942,"realized":0,"unrealized":-3340308},"Liquid":{"contribution":0.0,"attribution":-0.0138,"abs_return":0.0444,"total_gain":4554,"ending_mv":10246888,"realized":218,"unrealized":4336}}}}}},"1M":{"label":"1M (Feb 2026)","period":"01 Feb 2026 \u2013 28 Feb 2026","schemes":{"Moderate (9)":{"summary":{"total_gain":-508261,"total_mv":293351948,"total_contrib":-0.33,"sec_count":77},"agg":{"asset_class":{"Equity":{"contribution":0.0,"attribution":91.6214,"abs_return":-0.3644,"total_gain":-465676,"ending_mv":127807578,"realized":101700,"unrealized":-567376},"Fixed Income":{"contribution":0.05,"attribution":-2.5829,"abs_return":0.0273,"total_gain":13128,"ending_mv":48082355,"realized":0,"unrealized":13128},"Alternates":{"contribution":-0.39,"attribution":17.5132,"abs_return":-0.1318,"total_gain":-89013,"ending_mv":67518137,"realized":0,"unrealized":-89013},"Liquid":{"contribution":0.01,"attribution":-6.5518,"abs_return":0.0667,"total_gain":33300,"ending_mv":49943878,"realized":13692,"unrealized":19608}},"category":{"Domestic Equity":{"contribution":0.24,"attribution":2.5355,"abs_return":-0.0129,"total_gain":-12887,"ending_mv":100191882,"realized":101700,"unrealized":-114587},"International Equity":{"contribution":-0.24,"attribution":89.0859,"abs_return":-1.6396,"total_gain":-452789,"ending_mv":27615696,"realized":0,"unrealized":-452789},"ESS":{"contribution":-0.02,"attribution":9.0918,"abs_return":-0.413,"total_gain":-46210,"ending_mv":11189620,"realized":0,"unrealized":-46210},"Corporate Bonds":{"contribution":0.07,"attribution":-11.6747,"abs_return":0.1608,"total_gain":59338,"ending_mv":36892735,"realized":0,"unrealized":59338},"InVITs":{"contribution":0.24,"attribution":-55.5915,"abs_return":1.9726,"total_gain":282550,"ending_mv":14323756,"realized":0,"unrealized":282550},"Commodities":{"contribution":-0.63,"attribution":73.1048,"abs_return":-0.6985,"total_gain":-371563,"ending_mv":53194381,"realized":0,"unrealized":-371563},"Liquid":{"contribution":0.01,"attribution":-6.5518,"abs_return":0.0667,"total_gain":33300,"ending_mv":49943878,"realized":13692,"unrealized":19608}},"instrument":{"Direct Equity":{"contribution":-0.01,"attribution":30.8591,"abs_return":-0.6996,"total_gain":-156845,"ending_mv":22419002,"realized":36644,"unrealized":-193489},"Tactical":{"contribution":0.05,"attribution":-16.8118,"abs_return":0.6494,"total_gain":85448,"ending_mv":13158756,"realized":0,"unrealized":85448},"Factor":{"contribution":0.04,"attribution":7.35,"abs_return":-0.1155,"total_gain":-37357,"ending_mv":32340118,"realized":-10723,"unrealized":-26634},"Small Cap":{"contribution":0.07,"attribution":-22.9848,"abs_return":4.0275,"total_gain":116823,"ending_mv":2900657,"realized":0,"unrealized":116823},"Mid Cap":{"contribution":0.05,"attribution":-16.9456,"abs_return":3.07,"total_gain":86128,"ending_mv":2805464,"realized":46930,"unrealized":39198},"Flexi Cap":{"contribution":0.02,"attribution":22.8528,"abs_return":-0.4869,"total_gain":-116152,"ending_mv":23856895,"realized":0,"unrealized":-116152},"Large Cap":{"contribution":0.02,"attribution":-1.7841,"abs_return":0.3345,"total_gain":9068,"ending_mv":2710990,"realized":28849,"unrealized":-19781},"Emerging Market":{"contribution":0.0,"attribution":0.0016,"abs_return":-0.0053,"total_gain":-8,"ending_mv":149993,"realized":0,"unrealized":-8},"China":{"contribution":-0.08,"attribution":31.9218,"abs_return":-1.2275,"total_gain":-162246,"ending_mv":13218095,"realized":0,"unrealized":-162246},"USA":{"contribution":-0.16,"attribution":57.1626,"abs_return":-2.0392,"total_gain":-290535,"ending_mv":14247608,"realized":0,"unrealized":-290535},"ESS":{"contribution":-0.02,"attribution":9.0918,"abs_return":-0.413,"total_gain":-46210,"ending_mv":11189620,"realized":0,"unrealized":-46210},"Corporate Bonds":{"contribution":0.07,"attribution":-11.6747,"abs_return":0.1608,"total_gain":59338,"ending_mv":36892735,"realized":0,"unrealized":59338},"InVITs":{"contribution":0.24,"attribution":-55.5915,"abs_return":1.9726,"total_gain":282550,"ending_mv":14323756,"realized":0,"unrealized":282550},"Gold":{"contribution":-0.02,"attribution":-92.5881,"abs_return":1.1012,"total_gain":470589,"ending_mv":42732302,"realized":0,"unrealized":470589},"Silver":{"contribution":-0.61,"attribution":165.6928,"abs_return":-8.0496,"total_gain":-842152,"ending_mv":10462079,"realized":0,"unrealized":-842152},"Liquid":{"contribution":0.01,"attribution":-6.5518,"abs_return":0.0667,"total_gain":33300,"ending_mv":49943878,"realized":13692,"unrealized":19608}}}},"Aggressive (10)":{"summary":{"total_gain":-494131,"total_mv":826910408,"total_contrib":-0.19,"sec_count":101},"agg":{"asset_class":{"Equity":{"contribution":-0.16,"attribution":30.7325,"abs_return":-0.0243,"total_gain":-151859,"ending_mv":624781641,"realized":1555232,"unrealized":-1707091},"Fixed Income":{"contribution":0.02,"attribution":11.7374,"abs_return":-0.2525,"total_gain":-57998,"ending_mv":22972517,"realized":-92823,"unrealized":34825},"Alternates":{"contribution":-0.06,"attribution":71.4126,"abs_return":-0.2848,"total_gain":-352872,"ending_mv":123885611,"realized":0,"unrealized":-352872},"Liquid":{"contribution":0.01,"attribution":-13.8826,"abs_return":0.1241,"total_gain":68598,"ending_mv":55270639,"realized":42080,"unrealized":26518}},"category":{"Domestic Equity":{"contribution":0.29,"attribution":-565.5573,"abs_return":0.5828,"total_gain":2794594,"ending_mv":479478973,"realized":1555232,"unrealized":1239362},"Corporate Bonds":{"contribution":0.02,"attribution":7.4901,"abs_return":-0.2122,"total_gain":-37011,"ending_mv":17445336,"realized":-92823,"unrealized":55812},"International Equity":{"contribution":-0.45,"attribution":596.2899,"abs_return":-2.0278,"total_gain":-2946453,"ending_mv":145302668,"realized":0,"unrealized":-2946453},"ESS":{"contribution":0.0,"attribution":4.2473,"abs_return":-0.3797,"total_gain":-20987,"ending_mv":5527181,"realized":0,"unrealized":-20987},"InVITs":{"contribution":0.25,"attribution":-200.9514,"abs_return":2.4104,"total_gain":992963,"ending_mv":41194234,"realized":0,"unrealized":992963},"Commodities":{"contribution":-0.31,"attribution":272.364,"abs_return":-1.6275,"total_gain":-1345835,"ending_mv":82691377,"realized":0,"unrealized":-1345835},"Liquid":{"contribution":0.01,"attribution":-13.8826,"abs_return":0.1241,"total_gain":68598,"ending_mv":55270639,"realized":42080,"unrealized":26518}},"instrument":{"Direct Equity":{"contribution":-0.07,"attribution":-145.476,"abs_return":0.6187,"total_gain":718842,"ending_mv":116179004,"realized":1317498,"unrealized":-598656},"Corporate Bonds":{"contribution":0.02,"attribution":7.4901,"abs_return":-0.2122,"total_gain":-37011,"ending_mv":17445336,"realized":-92823,"unrealized":55812},"Tactical":{"contribution":0.07,"attribution":-142.7233,"abs_return":0.8336,"total_gain":705240,"ending_mv":84598970,"realized":0,"unrealized":705240},"Factor":{"contribution":0.1,"attribution":-83.4726,"abs_return":0.3106,"total_gain":412464,"ending_mv":132794719,"realized":70209,"unrealized":342255},"Small Cap":{"contribution":0.11,"attribution":-139.8611,"abs_return":3.3264,"total_gain":691097,"ending_mv":20776236,"realized":0,"unrealized":691097},"Mid Cap":{"contribution":0.07,"attribution":-94.6241,"abs_return":4.0188,"total_gain":467567,"ending_mv":11634386,"realized":167525,"unrealized":300042},"Flexi Cap":{"contribution":0.01,"attribution":40.5998,"abs_return":-0.1768,"total_gain":-200616,"ending_mv":113495658,"realized":0,"unrealized":-200616},"Emerging Market":{"contribution":0.0,"attribution":-0.3505,"abs_return":0.4311,"total_gain":1732,"ending_mv":401730,"realized":0,"unrealized":1732},"China":{"contribution":-0.14,"attribution":186.385,"abs_return":-1.3215,"total_gain":-920986,"ending_mv":69691437,"realized":0,"unrealized":-920986},"USA":{"contribution":-0.31,"attribution":410.2554,"abs_return":-2.6954,"total_gain":-2027199,"ending_mv":75209501,"realized":0,"unrealized":-2027199},"ESS":{"contribution":0.0,"attribution":4.2473,"abs_return":-0.3797,"total_gain":-20987,"ending_mv":5527181,"realized":0,"unrealized":-20987},"InVITs":{"contribution":0.25,"attribution":-200.9514,"abs_return":2.4104,"total_gain":992963,"ending_mv":41194234,"realized":0,"unrealized":992963},"Gold":{"contribution":0.01,"attribution":-99.3075,"abs_return":0.7704,"total_gain":490709,"ending_mv":63696157,"realized":0,"unrealized":490709},"Silver":{"contribution":-0.32,"attribution":371.6715,"abs_return":-9.6685,"total_gain":-1836544,"ending_mv":18995220,"realized":0,"unrealized":-1836544},"Liquid":{"contribution":0.01,"attribution":-13.8826,"abs_return":0.1241,"total_gain":68598,"ending_mv":55270639,"realized":42080,"unrealized":26518}}}},"Equity (11)":{"summary":{"total_gain":242623,"total_mv":516169529,"total_contrib":0.03,"sec_count":24},"agg":{"asset_class":{"Equity":{"contribution":0.03,"attribution":97.7632,"abs_return":0.0466,"total_gain":237196,"ending_mv":508860609,"realized":998507,"unrealized":-761311},"Liquid":{"contribution":0.0,"attribution":2.2368,"abs_return":0.0743,"total_gain":5427,"ending_mv":7308920,"realized":19748,"unrealized":-14321}},"category":{"Domestic Equity":{"contribution":0.59,"attribution":1239.6195,"abs_return":0.7889,"total_gain":3007602,"ending_mv":381219180,"realized":998507,"unrealized":2009095},"International Equity":{"contribution":-0.56,"attribution":-1141.8563,"abs_return":-2.1705,"total_gain":-2770406,"ending_mv":127641429,"realized":0,"unrealized":-2770406},"Liquid":{"contribution":0.0,"attribution":2.2368,"abs_return":0.0743,"total_gain":5427,"ending_mv":7308920,"realized":19748,"unrealized":-14321}},"instrument":{"Tactical":{"contribution":0.15,"attribution":328.3106,"abs_return":1.1524,"total_gain":796557,"ending_mv":69124407,"realized":0,"unrealized":796557},"Factor":{"contribution":0.18,"attribution":392.5621,"abs_return":1.0289,"total_gain":952446,"ending_mv":92572111,"realized":954438,"unrealized":-1992},"Flexi Cap":{"contribution":-0.07,"attribution":-165.9888,"abs_return":-0.2666,"total_gain":-402727,"ending_mv":151074451,"realized":0,"unrealized":-402727},"Mid Cap":{"contribution":0.27,"attribution":574.2123,"abs_return":2.3285,"total_gain":1393171,"ending_mv":59831652,"realized":50047,"unrealized":1343124},"Small Cap":{"contribution":0.05,"attribution":98.9436,"abs_return":2.786,"total_gain":240060,"ending_mv":8616559,"realized":0,"unrealized":240060},"Large Cap":{"contribution":0.01,"attribution":11.5797,"abs_return":0.0,"total_gain":28095,"ending_mv":0,"realized":-5978,"unrealized":34073},"Direct Equity":{"contribution":0.0,"attribution":0.0,"abs_return":0.0,"total_gain":0,"ending_mv":0,"realized":0,"unrealized":0},"China":{"contribution":-0.18,"attribution":-354.3967,"abs_return":-1.2848,"total_gain":-859848,"ending_mv":66925993,"realized":0,"unrealized":-859848},"USA":{"contribution":-0.38,"attribution":-787.4596,"abs_return":-3.1467,"total_gain":-1910558,"ending_mv":60715436,"realized":0,"unrealized":-1910558},"Liquid":{"contribution":0.0,"attribution":2.2368,"abs_return":0.0743,"total_gain":5427,"ending_mv":7308920,"realized":19748,"unrealized":-14321}}}}}}}};
-const SCHEMES = D.schemes;
-const LEVELS  = ['asset_class','category','instrument'];
-const LBL     = {asset_class:'Asset Class', category:'Category', instrument:'Instrument'};
-
-// Scheme colours matching the provided palette
-const SC = {
-  'Moderate (9)':   {color:'#222A9C', pos:'rgba(34,42,156,.80)',   neg:'rgba(34,42,156,.30)'},
-  'Aggressive (10)':{color:'#FFC000', pos:'rgba(255,192,0,.85)',  neg:'rgba(255,192,0,.30)'},
-  'Equity (11)':    {color:'#7BA0FF', pos:'rgba(123,160,255,.85)',neg:'rgba(123,160,255,.30)'}
-};
-const METRICS = {1:'contribution',2:'contribution',3:'attribution',4:'attribution',5:'abs_return',6:'abs_return'};
-
-let curPeriod = 'MTD';
-const sLevel  = {1:'asset_class',2:'asset_class',3:'asset_class',4:'asset_class',5:'asset_class',6:'asset_class'};
-const charts  = {};
-
-function p2(n){ return n==null ? '—' : n.toFixed(2)+'%'; }
-function vcls(n){ return n==null?'vn': n>0?'vg': n<0?'vl':'vn'; }
-
-function allKeys(level){
-  const k = new Set();
-  SCHEMES.forEach(s =>
-    Object.keys((D.data[curPeriod]?.schemes[s]?.agg[level]) || {}).forEach(x => k.add(x))
-  );
-  return Array.from(k).sort();
-}
-
-function getVal(scheme, level, key, metric){
-  const b = ((D.data[curPeriod]?.schemes[scheme]?.agg[level]) || {})[key];
-  return b != null ? b[metric] : null;
-}
-
-function drawChart(sid, level, metric){
-  const cid = 'c'+sid;
-  const canvas = document.getElementById(cid);
-  if(!canvas) return;
-  if(charts[cid]) charts[cid].destroy();
-
-  const bks = allKeys(level);
-  const datasets = SCHEMES.map(s => {
-    const c = SC[s];
-    const vals = bks.map(k => {
-      const v = getVal(s, level, k, metric);
-      return v != null ? parseFloat(v.toFixed(4)) : null;
-    });
-    return {
-      label: s, data: vals,
-      backgroundColor: vals.map(v => v == null ? 'transparent' : v >= 0 ? c.pos : c.neg),
-      borderColor:     vals.map(v => v == null ? 'transparent' : c.color),
-      borderWidth: 1.5, borderRadius: 4,
-    };
-  });
-
-  const ctx = canvas.getContext('2d');
-  charts[cid] = new Chart(ctx, {
-    type: 'bar',
-    data: {labels: bks, datasets},
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          labels: {
-            color: '#6B6460',
-            font: {size: 11, family: "'Reddit Sans', sans-serif"},
-            boxWidth: 12, padding: 18
-          }
-        },
-        tooltip: {
-          backgroundColor: '#fff',
-          titleColor: '#1C1917',
-          bodyColor: '#6B6460',
-          borderColor: '#E2D9CC',
-          borderWidth: 1,
-          callbacks: {
-            label: c => ` ${c.dataset.label}: ${c.parsed.y == null ? '—' : c.parsed.y.toFixed(2)+'%'}`
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: {color:'#6B6460', font:{size:10, family:"'Reddit Sans', sans-serif"}, maxRotation:35},
-          grid: {display: false},
-          border: {color: '#E2D9CC'}
-        },
-        y: {
-          ticks: {color:'#6B6460', font:{size:10, family:"'Reddit Sans', sans-serif"}, callback: v => v.toFixed(1)+'%'},
-          grid: {display: false},
-          border: {color: '#E2D9CC'}
-        }
-      }
-    }
-  });
-}
-
-function buildTable(level, metric){
-  const bks = allKeys(level);
-  let h = '<table><thead><tr class="sh">';
-  h += `<th class="lft">${LBL[level]}</th>`;
-  h += '<th class="mh">Moderate (9)</th><th class="ah">Aggressive (10)</th><th class="eh">Equity (11)</th>';
-  h += '</tr></thead><tbody>';
-  bks.forEach(k => {
-    h += `<tr><td class="lft">${k}</td>`;
-    SCHEMES.forEach(s => {
-      const v = getVal(s, level, k, metric);
-      h += v === null
-        ? `<td class="na">—</td>`
-        : `<td class="${vcls(v)}">${v.toFixed(2)}%</td>`;
-    });
-    h += '</tr>';
-  });
-  h += '<tr class="tot"><td class="lft">Total</td>';
-  SCHEMES.forEach(s => {
-    const tot = Object.values((D.data[curPeriod]?.schemes[s]?.agg[level]) || {})
-                      .reduce((a, b) => a + (b[metric] || 0), 0);
-    h += `<td class="${vcls(tot)}">${tot.toFixed(2)}%</td>`;
-  });
-  h += '</tr></tbody></table>';
-  return h;
-}
-
-function renderSection(sid){
-  const level = sLevel[sid], metric = METRICS[sid];
-  if(sid % 2 === 1) drawChart(sid, level, metric);
-  else document.getElementById('b'+sid).innerHTML = buildTable(level, metric);
-}
-
-function renderAll(){
-  document.getElementById('period-str').textContent = D.data[curPeriod]?.period || '';
-  [1,2,3,4,5,6].forEach(renderSection);
-}
-
-function setPeriod(pk){
-  curPeriod = pk;
-  document.querySelectorAll('.pbtn').forEach((b,i) => {
-    b.classList.toggle('active', ['MTD','1M','SI'][i] === pk);
-  });
-  renderAll();
-}
-
-function setLevel(sid, level){
-  sLevel[sid] = level;
-  document.getElementById('t'+sid).querySelectorAll('.ltab').forEach((b,i) => {
-    b.classList.toggle('active', LEVELS[i] === level);
-  });
-  renderSection(sid);
-}
-
+const D={"schemes":["Moderate (9)","Aggressive (10)","Equity (11)"],"periods":["MTD","1M","SI"],"all_keys":{"asset_class":["Alternates","Equity","Fixed Income","Liquid"],"category":["Commodities","Corporate Bonds","Domestic Equity","ESS","InVITs","International Equity","Liquid"],"instrument":["China","Corporate Bonds","Direct Equity","ESS","Emerging Market","Factor","Flexi Cap","Gold","InVITs","Large Cap","Liquid","Mid Cap","Silver","Small Cap","Tactical","USA"]},"data":{"SI":{"label":"Since Inception","period":"01/03/2025 To 20/03/2026","schemes":{"Moderate (9)":{"summary":{"total_gain":2416395,"total_mv":339223797,"total_contrib":23.25,"sec_count":101},"agg":{"asset_class":{"Equity":{"contribution":1.77,"attribution":-400.8744,"abs_return":-5.318,"total_gain":-9686708,"ending_mv":152960023,"realized":241099,"unrealized":-9927807,"income":10028},"Fixed Income":{"contribution":2.15,"attribution":8.2673,"abs_return":2.3963,"total_gain":199771,"ending_mv":57720108,"realized":4870,"unrealized":194901,"income":1196245},"Alternates":{"contribution":18.92,"attribution":484.813,"abs_return":12.5461,"total_gain":11714996,"ending_mv":94833278,"realized":7808632,"unrealized":3906364,"income":427891},"Liquid":{"contribution":0.41,"attribution":7.7941,"abs_return":0.0396,"total_gain":188336,"ending_mv":33710388,"realized":130639,"unrealized":57697,"income":0}},"category":{"Domestic Equity":{"contribution":-0.4,"attribution":-398.9015,"abs_return":-6.5765,"total_gain":-9639035,"ending_mv":117462395,"realized":241099,"unrealized":-9880134,"income":10028},"International Equity":{"contribution":2.17,"attribution":-1.9729,"abs_return":-0.1341,"total_gain":-47673,"ending_mv":35497628,"realized":0,"unrealized":-47673,"income":0},"ESS":{"contribution":-0.09,"attribution":-11.6648,"abs_return":-1.3633,"total_gain":-281867,"ending_mv":20394156,"realized":0,"unrealized":-281867,"income":0},"Corporate Bonds":{"contribution":2.24,"attribution":19.9321,"abs_return":4.4646,"total_gain":481638,"ending_mv":37325952,"realized":4870,"unrealized":476768,"income":1196245},"InVITs":{"contribution":1.11,"attribution":25.4523,"abs_return":3.0662,"total_gain":615028,"ending_mv":34593236,"realized":0,"unrealized":615028,"income":427891},"Commodities":{"contribution":17.81,"attribution":459.3607,"abs_return":17.6828,"total_gain":11099968,"ending_mv":60240042,"realized":7808632,"unrealized":3291336,"income":0},"Liquid":{"contribution":0.41,"attribution":7.7941,"abs_return":0.0396,"total_gain":188336,"ending_mv":33710388,"realized":130639,"unrealized":57697,"income":0}},"instrument":{"Direct Equity":{"contribution":0.11,"attribution":-115.4459,"abs_return":-7.6421,"total_gain":-2789629,"ending_mv":28011900,"realized":-22764,"unrealized":-2766865,"income":10028},"Tactical":{"contribution":-0.02,"attribution":-20.3974,"abs_return":-2.8111,"total_gain":-492881,"ending_mv":17040324,"realized":0,"unrealized":-492881,"income":0},"Flexi Cap":{"contribution":0.12,"attribution":-91.5376,"abs_return":-7.6851,"total_gain":-2211910,"ending_mv":26569720,"realized":0,"unrealized":-2211910,"income":0},"Factor":{"contribution":-0.42,"attribution":-140.0772,"abs_return":-7.0575,"total_gain":-3384819,"ending_mv":36146440,"realized":152213,"unrealized":-3537032,"income":0},"Large Cap":{"contribution":0.03,"attribution":-9.8922,"abs_return":-4.2138,"total_gain":-239035,"ending_mv":2733213,"realized":64720,"unrealized":-303755,"income":0},"Mid Cap":{"contribution":-0.09,"attribution":-10.795,"abs_return":-3.7662,"total_gain":-260850,"ending_mv":4051132,"realized":46930,"unrealized":-307780,"income":0},"Small Cap":{"contribution":-0.13,"attribution":-10.7561,"abs_return":-8.2002,"total_gain":-259911,"ending_mv":2909666,"realized":0,"unrealized":-259911,"income":0},"China":{"contribution":1.52,"attribution":11.8632,"abs_return":2.2323,"total_gain":286661,"ending_mv":13128090,"realized":0,"unrealized":286661,"income":0},"USA":{"contribution":0.68,"attribution":-9.5509,"abs_return":-1.2233,"total_gain":-230787,"ending_mv":18635161,"realized":0,"unrealized":-230787,"income":0},"Emerging Market":{"contribution":-0.03,"attribution":-4.2852,"abs_return":-2.698,"total_gain":-103547,"ending_mv":3734377,"realized":0,"unrealized":-103547,"income":0},"ESS":{"contribution":-0.09,"attribution":-11.6648,"abs_return":-1.3633,"total_gain":-281867,"ending_mv":20394156,"realized":0,"unrealized":-281867,"income":0},"Corporate Bonds":{"contribution":2.24,"attribution":19.9321,"abs_return":4.4646,"total_gain":481638,"ending_mv":37325952,"realized":4870,"unrealized":476768,"income":1196245},"InVITs":{"contribution":1.11,"attribution":25.4523,"abs_return":3.0662,"total_gain":615028,"ending_mv":34593236,"realized":0,"unrealized":615028,"income":427891},"Silver":{"contribution":12.93,"attribution":376.0379,"abs_return":57.8444,"total_gain":9086560,"ending_mv":11162521,"realized":7808632,"unrealized":1277928,"income":0},"Gold":{"contribution":4.88,"attribution":83.3228,"abs_return":4.278,"total_gain":2013408,"ending_mv":49077521,"realized":0,"unrealized":2013408,"income":0},"Liquid":{"contribution":0.41,"attribution":7.7941,"abs_return":0.0396,"total_gain":188336,"ending_mv":33710388,"realized":130639,"unrealized":57697,"income":0}}}},"Aggressive (10)":{"summary":{"total_gain":-8935385,"total_mv":849548111,"total_contrib":14.39,"sec_count":119},"agg":{"asset_class":{"Equity":{"contribution":4.39,"attribution":406.2244,"abs_return":-4.4658,"total_gain":-36297718,"ending_mv":622748364,"realized":-171212,"unrealized":-36126506,"income":59800},"Fixed Income":{"contribution":0.42,"attribution":1.3083,"abs_return":2.2605,"total_gain":-116900,"ending_mv":25324364,"realized":-2356,"unrealized":-114544,"income":696265},"Alternates":{"contribution":9.17,"attribution":-301.0803,"abs_return":21.7896,"total_gain":26902684,"ending_mv":127277016,"realized":15529561,"unrealized":11373123,"income":1486525},"Liquid":{"contribution":0.41,"attribution":-6.4524,"abs_return":0.0427,"total_gain":576549,"ending_mv":74198367,"realized":448956,"unrealized":127593,"income":0}},"category":{"Domestic Equity":{"contribution":1.78,"attribution":425.603,"abs_return":-5.7978,"total_gain":-38029263,"ending_mv":464779389,"realized":-171212,"unrealized":-37858051,"income":59800},"International Equity":{"contribution":2.61,"attribution":-19.3785,"abs_return":1.1059,"total_gain":1731545,"ending_mv":157968975,"realized":0,"unrealized":1731545,"income":0},"ESS":{"contribution":-0.01,"attribution":1.3324,"abs_return":-1.4369,"total_gain":-119055,"ending_mv":8022025,"realized":-2717,"unrealized":-116338,"income":0},"Corporate Bonds":{"contribution":0.43,"attribution":-0.0241,"abs_return":4.0269,"total_gain":2155,"ending_mv":17302339,"realized":361,"unrealized":1794,"income":696265},"InVITs":{"contribution":0.83,"attribution":-23.8502,"abs_return":8.2948,"total_gain":2131104,"ending_mv":45607214,"realized":0,"unrealized":2131104,"income":1486525},"Commodities":{"contribution":8.34,"attribution":-277.2301,"abs_return":28.5799,"total_gain":24771580,"ending_mv":81669802,"realized":15529561,"unrealized":9242019,"income":0},"Liquid":{"contribution":0.41,"attribution":-6.4524,"abs_return":0.0427,"total_gain":576549,"ending_mv":74198367,"realized":448956,"unrealized":127593,"income":0}},"instrument":{"Direct Equity":{"contribution":1.0,"attribution":141.8694,"abs_return":-6.9229,"total_gain":-12676581,"ending_mv":105324701,"realized":-1434835,"unrealized":-11241746,"income":59800},"Tactical":{"contribution":-0.03,"attribution":15.9515,"abs_return":-1.5849,"total_gain":-1425328,"ending_mv":86547138,"realized":-177751,"unrealized":-1247577,"income":0},"Flexi Cap":{"contribution":0.82,"attribution":101.7669,"abs_return":-7.5164,"total_gain":-9093264,"ending_mv":111285098,"realized":0,"unrealized":-9093264,"income":0},"Factor":{"contribution":0.05,"attribution":138.2346,"abs_return":-6.0403,"total_gain":-12351793,"ending_mv":129178502,"realized":1035200,"unrealized":-13386993,"income":0},"Large Cap":{"contribution":0.27,"attribution":-2.6708,"abs_return":1.912,"total_gain":238649,"ending_mv":0,"realized":238649,"unrealized":0,"income":0},"Mid Cap":{"contribution":-0.08,"attribution":9.1732,"abs_return":-3.7227,"total_gain":-819657,"ending_mv":11801259,"realized":167525,"unrealized":-987182,"income":0},"Small Cap":{"contribution":-0.25,"attribution":21.2782,"abs_return":-8.3595,"total_gain":-1901289,"ending_mv":20642691,"realized":0,"unrealized":-1901289,"income":0},"China":{"contribution":2.17,"attribution":-33.0897,"abs_return":4.4743,"total_gain":2956688,"ending_mv":68905416,"realized":0,"unrealized":2956688,"income":0},"USA":{"contribution":0.45,"attribution":12.8673,"abs_return":-1.3267,"total_gain":-1149745,"ending_mv":85313875,"realized":0,"unrealized":-1149745,"income":0},"Emerging Market":{"contribution":-0.01,"attribution":0.8438,"abs_return":-1.9711,"total_gain":-75398,"ending_mv":3749684,"realized":0,"unrealized":-75398,"income":0},"ESS":{"contribution":-0.01,"attribution":1.3324,"abs_return":-1.4369,"total_gain":-119055,"ending_mv":8022025,"realized":-2717,"unrealized":-116338,"income":0},"Corporate Bonds":{"contribution":0.43,"attribution":-0.0241,"abs_return":4.0269,"total_gain":2155,"ending_mv":17302339,"realized":361,"unrealized":1794,"income":696265},"InVITs":{"contribution":0.83,"attribution":-23.8502,"abs_return":8.2948,"total_gain":2131104,"ending_mv":45607214,"realized":0,"unrealized":2131104,"income":1486525},"Gold":{"contribution":2.81,"attribution":-63.7364,"abs_return":9.648,"total_gain":5695097,"ending_mv":64105978,"realized":63154,"unrealized":5631943,"income":0},"Silver":{"contribution":5.53,"attribution":-213.4937,"abs_return":69.0021,"total_gain":19076483,"ending_mv":17563824,"realized":15466407,"unrealized":3610076,"income":0},"Liquid":{"contribution":0.41,"attribution":-6.4524,"abs_return":0.0427,"total_gain":576549,"ending_mv":74198367,"realized":448956,"unrealized":127593,"income":0}}}},"Equity (11)":{"summary":{"total_gain":-3570731,"total_mv":496755319,"total_contrib":3.66,"sec_count":56},"agg":{"asset_class":{"Equity":{"contribution":2.9,"attribution":127.8561,"abs_return":-0.758,"total_gain":-4565399,"ending_mv":486508431,"realized":4129182,"unrealized":-8694581,"income":91},"Liquid":{"contribution":0.76,"attribution":-27.8561,"abs_return":0.0975,"total_gain":994668,"ending_mv":10246888,"realized":975362,"unrealized":19306,"income":0}},"category":{"Domestic Equity":{"contribution":0.14,"attribution":443.6881,"abs_return":-3.2574,"total_gain":-15842909,"ending_mv":360606106,"realized":4074228,"unrealized":-19917137,"income":91},"International Equity":{"contribution":2.76,"attribution":-315.832,"abs_return":9.7292,"total_gain":11277510,"ending_mv":125902325,"realized":54954,"unrealized":11222556,"income":0},"Liquid":{"contribution":0.76,"attribution":-27.8561,"abs_return":0.0975,"total_gain":994668,"ending_mv":10246888,"realized":975362,"unrealized":19306,"income":0}},"instrument":{"Direct Equity":{"contribution":0.02,"attribution":-0.0288,"abs_return":0.1171,"total_gain":1030,"ending_mv":0,"realized":1030,"unrealized":0,"income":91},"Tactical":{"contribution":0.03,"attribution":-12.6943,"abs_return":0.6806,"total_gain":453281,"ending_mv":66697703,"realized":29383,"unrealized":423898,"income":0},"Factor":{"contribution":-0.11,"attribution":141.0983,"abs_return":-2.9414,"total_gain":-5038242,"ending_mv":86428401,"realized":3177748,"unrealized":-8215990,"income":0},"Mid Cap":{"contribution":0.26,"attribution":88.7031,"abs_return":-5.1696,"total_gain":-3167350,"ending_mv":56050934,"realized":77570,"unrealized":-3244920,"income":0},"Large Cap":{"contribution":0.27,"attribution":-21.1113,"abs_return":3.113,"total_gain":753828,"ending_mv":0,"realized":753828,"unrealized":0,"income":0},"Flexi Cap":{"contribution":-0.19,"attribution":226.1653,"abs_return":-5.3085,"total_gain":-8075756,"ending_mv":143017713,"realized":32497,"unrealized":-8108253,"income":0},"Small Cap":{"contribution":-0.14,"attribution":21.5558,"abs_return":-7.7777,"total_gain":-769700,"ending_mv":8411355,"realized":2172,"unrealized":-771872,"income":0},"China":{"contribution":2.24,"attribution":-288.6247,"abs_return":19.0168,"total_gain":10306010,"ending_mv":63852942,"realized":39925,"unrealized":10266085,"income":0},"USA":{"contribution":0.53,"attribution":-28.1079,"abs_return":1.6394,"total_gain":1003656,"ending_mv":61581528,"realized":15029,"unrealized":988627,"income":0},"Emerging Market":{"contribution":-0.01,"attribution":0.9005,"abs_return":-6.4311,"total_gain":-32156,"ending_mv":467855,"realized":0,"unrealized":-32156,"income":0},"Liquid":{"contribution":0.76,"attribution":-27.8561,"abs_return":0.0975,"total_gain":994668,"ending_mv":10246888,"realized":975362,"unrealized":19306,"income":0}}}}}},"MTD":{"label":"MTD","period":"01/03/2026 to 20/03/2026","schemes":{"Moderate (9)":{"summary":{"total_gain":-16400532,"total_mv":339223797,"total_contrib":-4.87,"sec_count":76},"agg":{"asset_class":{"Equity":{"contribution":-3.23,"attribution":64.3123,"abs_return":-6.4508,"total_gain":-10547553,"ending_mv":152960023,"realized":0,"unrealized":-10547553,"income":0},"Fixed Income":{"contribution":0.12,"attribution":-1.3062,"abs_return":0.7663,"total_gain":214220,"ending_mv":57720108,"realized":0,"unrealized":214220,"income":226553},"Alternates":{"contribution":-1.77,"attribution":37.2025,"abs_return":-6.0449,"total_gain":-6101411,"ending_mv":94833278,"realized":0,"unrealized":-6101411,"income":0},"Liquid":{"contribution":0.01,"attribution":-0.2086,"abs_return":0.0238,"total_gain":34212,"ending_mv":33710388,"realized":15867,"unrealized":18345,"income":0}},"category":{"Domestic Equity":{"contribution":-2.94,"attribution":58.3546,"abs_return":-7.5338,"total_gain":-9570460,"ending_mv":117462395,"realized":0,"unrealized":-9570460,"income":0},"International Equity":{"contribution":-0.29,"attribution":5.9577,"abs_return":-2.6788,"total_gain":-977093,"ending_mv":35497628,"realized":0,"unrealized":-977093,"income":0},"ESS":{"contribution":-0.07,"attribution":1.4369,"abs_return":-1.1423,"total_gain":-235657,"ending_mv":20394156,"realized":0,"unrealized":-235657,"income":0},"Corporate Bonds":{"contribution":0.19,"attribution":-2.7431,"abs_return":1.8335,"total_gain":449877,"ending_mv":37325952,"realized":0,"unrealized":449877,"income":226553},"InVITs":{"contribution":-0.03,"attribution":0.567,"abs_return":-0.2681,"total_gain":-92985,"ending_mv":34593236,"realized":0,"unrealized":-92985,"income":0},"Commodities":{"contribution":-1.74,"attribution":36.6356,"abs_return":-9.0695,"total_gain":-6008426,"ending_mv":60240042,"realized":0,"unrealized":-6008426,"income":0},"Liquid":{"contribution":0.01,"attribution":-0.2086,"abs_return":0.0238,"total_gain":34212,"ending_mv":33710388,"realized":15867,"unrealized":18345,"income":0}},"instrument":{"Direct Equity":{"contribution":-0.76,"attribution":14.9528,"abs_return":-8.0499,"total_gain":-2452342,"ending_mv":28011900,"realized":0,"unrealized":-2452342,"income":0},"Tactical":{"contribution":-0.28,"attribution":5.5763,"abs_return":-5.0935,"total_gain":-914539,"ending_mv":17040324,"realized":0,"unrealized":-914539,"income":0},"Flexi Cap":{"contribution":-0.66,"attribution":13.1404,"abs_return":-7.5026,"total_gain":-2155095,"ending_mv":26569720,"realized":0,"unrealized":-2155095,"income":0},"Small Cap":{"contribution":-0.07,"attribution":1.4471,"abs_return":-7.5417,"total_gain":-237337,"ending_mv":2909666,"realized":0,"unrealized":-237337,"income":0},"Large Cap":{"contribution":-0.08,"attribution":1.5418,"abs_return":-8.4681,"total_gain":-252864,"ending_mv":2733213,"realized":0,"unrealized":-252864,"income":0},"Mid Cap":{"contribution":-0.09,"attribution":1.7743,"abs_return":-6.7017,"total_gain":-290998,"ending_mv":4051132,"realized":0,"unrealized":-290998,"income":0},"Factor":{"contribution":-1.0,"attribution":19.9218,"abs_return":-8.2897,"total_gain":-3267285,"ending_mv":36146440,"realized":0,"unrealized":-3267285,"income":0},"Emerging Market":{"contribution":-0.03,"attribution":0.6313,"abs_return":-2.6978,"total_gain":-103539,"ending_mv":3734377,"realized":0,"unrealized":-103539,"income":0},"USA":{"contribution":-0.06,"attribution":1.2075,"abs_return":-1.0515,"total_gain":-198029,"ending_mv":18635161,"realized":0,"unrealized":-198029,"income":0},"China":{"contribution":-0.2,"attribution":4.1189,"abs_return":-4.8938,"total_gain":-675525,"ending_mv":13128090,"realized":0,"unrealized":-675525,"income":0},"ESS":{"contribution":-0.07,"attribution":1.4369,"abs_return":-1.1423,"total_gain":-235657,"ending_mv":20394156,"realized":0,"unrealized":-235657,"income":0},"Corporate Bonds":{"contribution":0.19,"attribution":-2.7431,"abs_return":1.8335,"total_gain":449877,"ending_mv":37325952,"realized":0,"unrealized":449877,"income":226553},"InVITs":{"contribution":-0.03,"attribution":0.567,"abs_return":-0.2681,"total_gain":-92985,"ending_mv":34593236,"realized":0,"unrealized":-92985,"income":0},"Silver":{"contribution":-0.48,"attribution":10.0166,"abs_return":-12.8289,"total_gain":-1642776,"ending_mv":11162521,"realized":0,"unrealized":-1642776,"income":0},"Gold":{"contribution":-1.26,"attribution":26.619,"abs_return":-8.1688,"total_gain":-4365650,"ending_mv":49077521,"realized":0,"unrealized":-4365650,"income":0},"Liquid":{"contribution":0.01,"attribution":-0.2086,"abs_return":0.0238,"total_gain":34212,"ending_mv":33710388,"realized":15867,"unrealized":18345,"income":0}}}},"Aggressive (10)":{"summary":{"total_gain":-54281471,"total_mv":849548111,"total_contrib":-6.23,"sec_count":80},"agg":{"asset_class":{"Equity":{"contribution":-5.28,"attribution":84.5675,"abs_return":-6.714,"total_gain":-45904493,"ending_mv":622748364,"realized":-2783393,"unrealized":-43121100,"income":0},"Fixed Income":{"contribution":-0.01,"attribution":0.2584,"abs_return":0.2197,"total_gain":-140286,"ending_mv":25324364,"realized":-2717,"unrealized":-137569,"income":196769},"Alternates":{"contribution":-0.95,"attribution":15.3004,"abs_return":-6.1256,"total_gain":-8305290,"ending_mv":127277016,"realized":0,"unrealized":-8305290,"income":0},"Liquid":{"contribution":0.01,"attribution":-0.1264,"abs_return":0.0358,"total_gain":68598,"ending_mv":74198367,"realized":58685,"unrealized":9913,"income":0}},"category":{"Domestic Equity":{"contribution":-4.77,"attribution":76.1941,"abs_return":-7.9354,"total_gain":-41359253,"ending_mv":464779389,"realized":-2783393,"unrealized":-38575860,"income":0},"International Equity":{"contribution":-0.51,"attribution":8.3735,"abs_return":-2.7968,"total_gain":-4545240,"ending_mv":157968975,"realized":0,"unrealized":-4545240,"income":0},"ESS":{"contribution":-0.01,"attribution":0.1807,"abs_return":-1.1866,"total_gain":-98067,"ending_mv":8022025,"realized":-2717,"unrealized":-95350,"income":0},"Corporate Bonds":{"contribution":0.0,"attribution":0.0778,"abs_return":0.8859,"total_gain":-42219,"ending_mv":17302339,"realized":0,"unrealized":-42219,"income":196769},"InVITs":{"contribution":-0.02,"attribution":0.3506,"abs_return":-0.4156,"total_gain":-190328,"ending_mv":45607214,"realized":0,"unrealized":-190328,"income":0},"Commodities":{"contribution":-0.93,"attribution":14.9498,"abs_return":-9.0382,"total_gain":-8114962,"ending_mv":81669802,"realized":0,"unrealized":-8114962,"income":0},"Liquid":{"contribution":0.01,"attribution":-0.1264,"abs_return":0.0358,"total_gain":68598,"ending_mv":74198367,"realized":58685,"unrealized":9913,"income":0}},"instrument":{"Direct Equity":{"contribution":-1.38,"attribution":22.1438,"abs_return":-9.2142,"total_gain":-12019997,"ending_mv":105324701,"realized":-2605642,"unrealized":-9414355,"income":0},"Tactical":{"contribution":-0.63,"attribution":9.962,"abs_return":-5.7581,"total_gain":-5407509,"ending_mv":86547138,"realized":-177751,"unrealized":-5229758,"income":0},"Flexi Cap":{"contribution":-1.06,"attribution":17.066,"abs_return":-7.6846,"total_gain":-9263657,"ending_mv":111285098,"realized":0,"unrealized":-9263657,"income":0},"Mid Cap":{"contribution":-0.11,"attribution":1.7621,"abs_return":-7.4972,"total_gain":-956475,"ending_mv":11801259,"realized":0,"unrealized":-956475,"income":0},"Small Cap":{"contribution":-0.19,"attribution":3.0118,"abs_return":-7.3386,"total_gain":-1634852,"ending_mv":20642691,"realized":0,"unrealized":-1634852,"income":0},"Factor":{"contribution":-1.4,"attribution":22.2484,"abs_return":-8.5496,"total_gain":-12076763,"ending_mv":129178502,"realized":0,"unrealized":-12076763,"income":0},"Emerging Market":{"contribution":-0.01,"attribution":0.1421,"abs_return":-2.0155,"total_gain":-77129,"ending_mv":3749684,"realized":0,"unrealized":-77129,"income":0},"USA":{"contribution":-0.1,"attribution":1.6917,"abs_return":-1.0649,"total_gain":-918295,"ending_mv":85313875,"realized":0,"unrealized":-918295,"income":0},"China":{"contribution":-0.4,"attribution":6.5396,"abs_return":-4.8993,"total_gain":-3549816,"ending_mv":68905416,"realized":0,"unrealized":-3549816,"income":0},"ESS":{"contribution":-0.01,"attribution":0.1807,"abs_return":-1.1866,"total_gain":-98067,"ending_mv":8022025,"realized":-2717,"unrealized":-95350,"income":0},"Corporate Bonds":{"contribution":0.0,"attribution":0.0778,"abs_return":0.8859,"total_gain":-42219,"ending_mv":17302339,"realized":0,"unrealized":-42219,"income":196769},"InVITs":{"contribution":-0.02,"attribution":0.3506,"abs_return":-0.4156,"total_gain":-190328,"ending_mv":45607214,"realized":0,"unrealized":-190328,"income":0},"Gold":{"contribution":-0.63,"attribution":10.1092,"abs_return":-7.885,"total_gain":-5487414,"ending_mv":64105978,"realized":0,"unrealized":-5487414,"income":0},"Silver":{"contribution":-0.3,"attribution":4.8406,"abs_return":-13.0132,"total_gain":-2627548,"ending_mv":17563824,"realized":0,"unrealized":-2627548,"income":0},"Liquid":{"contribution":0.01,"attribution":-0.1264,"abs_return":0.0358,"total_gain":68598,"ending_mv":74198367,"realized":58685,"unrealized":9913,"income":0}}}},"Equity (11)":{"summary":{"total_gain":-32999226,"total_mv":496755319,"total_contrib":-6.29,"sec_count":28},"agg":{"asset_class":{"Equity":{"contribution":-6.29,"attribution":100.0138,"abs_return":-6.3528,"total_gain":-33003780,"ending_mv":486508431,"realized":0,"unrealized":-33003780,"income":0},"Liquid":{"contribution":0.0,"attribution":-0.0138,"abs_return":0.0181,"total_gain":4554,"ending_mv":10246888,"realized":218,"unrealized":4336,"income":0}},"category":{"Domestic Equity":{"contribution":-5.51,"attribution":87.6264,"abs_return":-7.4235,"total_gain":-28916026,"ending_mv":360606106,"realized":0,"unrealized":-28916026,"income":0},"International Equity":{"contribution":-0.78,"attribution":12.3874,"abs_return":-3.1447,"total_gain":-4087754,"ending_mv":125902325,"realized":0,"unrealized":-4087754,"income":0},"Liquid":{"contribution":0.0,"attribution":-0.0138,"abs_return":0.0181,"total_gain":4554,"ending_mv":10246888,"realized":218,"unrealized":4336,"income":0}},"instrument":{"Tactical":{"contribution":-0.83,"attribution":13.1109,"abs_return":-6.0916,"total_gain":-4326501,"ending_mv":66697703,"realized":0,"unrealized":-4326501,"income":0},"Large Cap":{"contribution":0.0,"attribution":-0.0,"abs_return":0.0,"total_gain":0,"ending_mv":0,"realized":0,"unrealized":0,"income":0},"Small Cap":{"contribution":-0.12,"attribution":2.0437,"abs_return":-7.4227,"total_gain":-674412,"ending_mv":8411355,"realized":0,"unrealized":-674412,"income":0},"Flexi Cap":{"contribution":-2.06,"attribution":32.6481,"abs_return":-7.0054,"total_gain":-10773628,"ending_mv":143017713,"realized":0,"unrealized":-10773628,"income":0},"Mid Cap":{"contribution":-0.91,"attribution":14.5537,"abs_return":-7.8921,"total_gain":-4802602,"ending_mv":56050934,"realized":0,"unrealized":-4802602,"income":0},"Factor":{"contribution":-1.59,"attribution":25.2699,"abs_return":-8.7993,"total_gain":-8338883,"ending_mv":86428401,"realized":0,"unrealized":-8338883,"income":0},"Emerging Market":{"contribution":-0.01,"attribution":0.0974,"abs_return":-6.4311,"total_gain":-32156,"ending_mv":467855,"realized":0,"unrealized":-32156,"income":0},"USA":{"contribution":-0.15,"attribution":2.1676,"abs_return":-1.1482,"total_gain":-715290,"ending_mv":61581528,"realized":0,"unrealized":-715290,"income":0},"China":{"contribution":-0.62,"attribution":10.1224,"abs_return":-4.9712,"total_gain":-3340308,"ending_mv":63852942,"realized":0,"unrealized":-3340308,"income":0},"Liquid":{"contribution":0.0,"attribution":-0.0138,"abs_return":0.0181,"total_gain":4554,"ending_mv":10246888,"realized":218,"unrealized":4336,"income":0}}}}}},"1M":{"label":"1M (Prev Month)","period":"01/02/2026 to 28/02/2026","schemes":{"Moderate (9)":{"summary":{"total_gain":-508261,"total_mv":293351948,"total_contrib":-0.33,"sec_count":77},"agg":{"asset_class":{"Equity":{"contribution":0.0,"attribution":91.6214,"abs_return":-0.3336,"total_gain":-465676,"ending_mv":127807578,"realized":101700,"unrealized":-567376,"income":1941},"Fixed Income":{"contribution":0.05,"attribution":-2.5829,"abs_return":0.4938,"total_gain":13128,"ending_mv":48082355,"realized":0,"unrealized":13128,"income":223951},"Alternates":{"contribution":-0.39,"attribution":17.5132,"abs_return":0.2742,"total_gain":-89013,"ending_mv":67518137,"realized":0,"unrealized":-89013,"income":274400},"Liquid":{"contribution":0.01,"attribution":-6.5518,"abs_return":0.0185,"total_gain":33300,"ending_mv":49943878,"realized":13692,"unrealized":19608,"income":0}},"category":{"Domestic Equity":{"contribution":0.24,"attribution":2.5355,"abs_return":-0.0099,"total_gain":-12887,"ending_mv":100191882,"realized":101700,"unrealized":-114587,"income":1941},"International Equity":{"contribution":-0.24,"attribution":89.0859,"abs_return":-1.6132,"total_gain":-452789,"ending_mv":27615696,"realized":0,"unrealized":-452789,"income":0},"ESS":{"contribution":-0.02,"attribution":9.0918,"abs_return":-0.4113,"total_gain":-46210,"ending_mv":11189620,"realized":0,"unrealized":-46210,"income":0},"Corporate Bonds":{"contribution":0.07,"attribution":-11.6747,"abs_return":0.7703,"total_gain":59338,"ending_mv":36892735,"realized":0,"unrealized":59338,"income":223951},"InVITs":{"contribution":0.24,"attribution":-55.5915,"abs_return":3.9665,"total_gain":282550,"ending_mv":14323756,"realized":0,"unrealized":282550,"income":274400},"Commodities":{"contribution":-0.63,"attribution":73.1048,"abs_return":-0.6937,"total_gain":-371563,"ending_mv":53194381,"realized":0,"unrealized":-371563,"income":0},"Liquid":{"contribution":0.01,"attribution":-6.5518,"abs_return":0.0185,"total_gain":33300,"ending_mv":49943878,"realized":13692,"unrealized":19608,"income":0}},"instrument":{"Direct Equity":{"contribution":-0.02,"attribution":34.3963,"abs_return":-0.765,"total_gain":-174823,"ending_mv":22419002,"realized":773,"unrealized":-175596,"income":1941},"Tactical":{"contribution":0.05,"attribution":-16.8118,"abs_return":0.6536,"total_gain":85448,"ending_mv":13158756,"realized":0,"unrealized":85448,"income":0},"Factor":{"contribution":0.04,"attribution":7.35,"abs_return":-0.0989,"total_gain":-37357,"ending_mv":32340118,"realized":-10723,"unrealized":-26634,"income":0},"Small Cap":{"contribution":0.07,"attribution":-22.9848,"abs_return":4.1965,"total_gain":116823,"ending_mv":2900657,"realized":0,"unrealized":116823,"income":0},"Mid Cap":{"contribution":0.05,"attribution":-16.9456,"abs_return":1.6149,"total_gain":86128,"ending_mv":2805464,"realized":46930,"unrealized":39198,"income":0},"Flexi Cap":{"contribution":0.02,"attribution":22.8528,"abs_return":-0.4845,"total_gain":-116152,"ending_mv":23856895,"realized":0,"unrealized":-116152,"income":0},"Large Cap":{"contribution":0.03,"attribution":-5.3213,"abs_return":0.5023,"total_gain":27046,"ending_mv":2710990,"realized":64720,"unrealized":-37674,"income":0},"Emerging Market":{"contribution":0.0,"attribution":0.0016,"abs_return":-0.0053,"total_gain":-8,"ending_mv":149993,"realized":0,"unrealized":-8,"income":0},"China":{"contribution":-0.08,"attribution":31.9218,"abs_return":-1.2126,"total_gain":-162246,"ending_mv":13218095,"realized":0,"unrealized":-162246,"income":0},"USA":{"contribution":-0.16,"attribution":57.1626,"abs_return":-1.9984,"total_gain":-290535,"ending_mv":14247608,"realized":0,"unrealized":-290535,"income":0},"ESS":{"contribution":-0.02,"attribution":9.0918,"abs_return":-0.4113,"total_gain":-46210,"ending_mv":11189620,"realized":0,"unrealized":-46210,"income":0},"Corporate Bonds":{"contribution":0.07,"attribution":-11.6747,"abs_return":0.7703,"total_gain":59338,"ending_mv":36892735,"realized":0,"unrealized":59338,"income":223951},"InVITs":{"contribution":0.24,"attribution":-55.5915,"abs_return":3.9665,"total_gain":282550,"ending_mv":14323756,"realized":0,"unrealized":282550,"income":274400},"Gold":{"contribution":-0.02,"attribution":-92.5881,"abs_return":1.1135,"total_gain":470589,"ending_mv":42732302,"realized":0,"unrealized":470589,"income":0},"Silver":{"contribution":-0.61,"attribution":165.6928,"abs_return":-7.4499,"total_gain":-842152,"ending_mv":10462079,"realized":0,"unrealized":-842152,"income":0},"Liquid":{"contribution":0.01,"attribution":-6.5518,"abs_return":0.0185,"total_gain":33300,"ending_mv":49943878,"realized":13692,"unrealized":19608,"income":0}}}},"Aggressive (10)":{"summary":{"total_gain":-494131,"total_mv":826910408,"total_contrib":-0.19,"sec_count":101},"agg":{"asset_class":{"Equity":{"contribution":-0.16,"attribution":49.5176,"abs_return":-0.0339,"total_gain":-244682,"ending_mv":624781641,"realized":1462409,"unrealized":-1707091,"income":11832},"Fixed Income":{"contribution":0.02,"attribution":-7.0477,"abs_return":0.6039,"total_gain":34825,"ending_mv":22972517,"realized":0,"unrealized":34825,"income":103462},"Alternates":{"contribution":-0.06,"attribution":71.4126,"abs_return":0.4504,"total_gain":-352872,"ending_mv":123885611,"realized":0,"unrealized":-352872,"income":914318},"Liquid":{"contribution":0.01,"attribution":-13.8826,"abs_return":0.0217,"total_gain":68598,"ending_mv":55270639,"realized":42080,"unrealized":26518,"income":0}},"category":{"Domestic Equity":{"contribution":0.29,"attribution":-546.7722,"abs_return":0.5047,"total_gain":2701771,"ending_mv":479478973,"realized":1462409,"unrealized":1239362,"income":11832},"International Equity":{"contribution":-0.45,"attribution":596.2899,"abs_return":-1.983,"total_gain":-2946453,"ending_mv":145302668,"realized":0,"unrealized":-2946453,"income":0},"ESS":{"contribution":0.0,"attribution":4.2473,"abs_return":-0.3783,"total_gain":-20987,"ending_mv":5527181,"realized":0,"unrealized":-20987,"income":0},"Corporate Bonds":{"contribution":0.02,"attribution":-11.295,"abs_return":0.918,"total_gain":55812,"ending_mv":17445336,"realized":0,"unrealized":55812,"income":103462},"InVITs":{"contribution":0.25,"attribution":-200.9514,"abs_return":4.7443,"total_gain":992963,"ending_mv":41194234,"realized":0,"unrealized":992963,"income":914318},"Commodities":{"contribution":-0.31,"attribution":272.364,"abs_return":-1.5936,"total_gain":-1345835,"ending_mv":82691377,"realized":0,"unrealized":-1345835,"income":0},"Liquid":{"contribution":0.01,"attribution":-13.8826,"abs_return":0.0217,"total_gain":68598,"ending_mv":55270639,"realized":42080,"unrealized":26518,"income":0}},"instrument":{"Direct Equity":{"contribution":-0.07,"attribution":-126.6909,"abs_return":0.5171,"total_gain":626019,"ending_mv":116179004,"realized":1224675,"unrealized":-598656,"income":11832},"Tactical":{"contribution":0.07,"attribution":-142.7233,"abs_return":0.8406,"total_gain":705240,"ending_mv":84598970,"realized":0,"unrealized":705240,"income":0},"Factor":{"contribution":0.1,"attribution":-83.4726,"abs_return":0.2353,"total_gain":412464,"ending_mv":132794719,"realized":70209,"unrealized":342255,"income":0},"Small Cap":{"contribution":0.11,"attribution":-139.8611,"abs_return":3.4069,"total_gain":691097,"ending_mv":20776236,"realized":0,"unrealized":691097,"income":0},"Mid Cap":{"contribution":0.07,"attribution":-94.6241,"abs_return":2.2737,"total_gain":467567,"ending_mv":11634386,"realized":167525,"unrealized":300042,"income":0},"Flexi Cap":{"contribution":0.01,"attribution":40.5998,"abs_return":-0.1755,"total_gain":-200616,"ending_mv":113495658,"realized":0,"unrealized":-200616,"income":0},"Emerging Market":{"contribution":0.0,"attribution":-0.3505,"abs_return":0.433,"total_gain":1732,"ending_mv":401730,"realized":0,"unrealized":1732,"income":0},"China":{"contribution":-0.14,"attribution":186.385,"abs_return":-1.3018,"total_gain":-920986,"ending_mv":69691437,"realized":0,"unrealized":-920986,"income":0},"USA":{"contribution":-0.31,"attribution":410.2554,"abs_return":-2.6179,"total_gain":-2027199,"ending_mv":75209501,"realized":0,"unrealized":-2027199,"income":0},"ESS":{"contribution":0.0,"attribution":4.2473,"abs_return":-0.3783,"total_gain":-20987,"ending_mv":5527181,"realized":0,"unrealized":-20987,"income":0},"Corporate Bonds":{"contribution":0.02,"attribution":-11.295,"abs_return":0.918,"total_gain":55812,"ending_mv":17445336,"realized":0,"unrealized":55812,"income":103462},"InVITs":{"contribution":0.25,"attribution":-200.9514,"abs_return":4.7443,"total_gain":992963,"ending_mv":41194234,"realized":0,"unrealized":992963,"income":914318},"Gold":{"contribution":0.01,"attribution":-99.3075,"abs_return":0.7718,"total_gain":490709,"ending_mv":63696157,"realized":0,"unrealized":490709,"income":0},"Silver":{"contribution":-0.32,"attribution":371.6715,"abs_return":-8.7985,"total_gain":-1836544,"ending_mv":18995220,"realized":0,"unrealized":-1836544,"income":0},"Liquid":{"contribution":0.01,"attribution":-13.8826,"abs_return":0.0217,"total_gain":68598,"ending_mv":55270639,"realized":42080,"unrealized":26518,"income":0}}}},"Equity (11)":{"summary":{"total_gain":242623,"total_mv":516169529,"total_contrib":0.03,"sec_count":24},"agg":{"asset_class":{"Equity":{"contribution":0.03,"attribution":97.7632,"abs_return":0.0426,"total_gain":237196,"ending_mv":508860609,"realized":998507,"unrealized":-761311,"income":0},"Liquid":{"contribution":0.0,"attribution":2.2368,"abs_return":0.0088,"total_gain":5427,"ending_mv":7308920,"realized":19748,"unrealized":-14321,"income":0}},"category":{"Domestic Equity":{"contribution":0.59,"attribution":1239.6195,"abs_return":0.705,"total_gain":3007602,"ending_mv":381219180,"realized":998507,"unrealized":2009095,"income":0},"International Equity":{"contribution":-0.56,"attribution":-1141.8563,"abs_return":-2.1244,"total_gain":-2770406,"ending_mv":127641429,"realized":0,"unrealized":-2770406,"income":0},"Liquid":{"contribution":0.0,"attribution":2.2368,"abs_return":0.0088,"total_gain":5427,"ending_mv":7308920,"realized":19748,"unrealized":-14321,"income":0}},"instrument":{"Tactical":{"contribution":0.15,"attribution":328.3106,"abs_return":1.1658,"total_gain":796557,"ending_mv":69124407,"realized":0,"unrealized":796557,"income":0},"Factor":{"contribution":0.18,"attribution":392.5621,"abs_return":0.697,"total_gain":952446,"ending_mv":92572111,"realized":954438,"unrealized":-1992,"income":0},"Flexi Cap":{"contribution":-0.07,"attribution":-165.9888,"abs_return":-0.2659,"total_gain":-402727,"ending_mv":151074451,"realized":0,"unrealized":-402727,"income":0},"Mid Cap":{"contribution":0.27,"attribution":574.2123,"abs_return":2.3239,"total_gain":1393171,"ending_mv":59831652,"realized":50047,"unrealized":1343124,"income":0},"Small Cap":{"contribution":0.05,"attribution":98.9436,"abs_return":2.8659,"total_gain":240060,"ending_mv":8616559,"realized":0,"unrealized":240060,"income":0},"Large Cap":{"contribution":0.01,"attribution":11.5797,"abs_return":1.556,"total_gain":28095,"ending_mv":0,"realized":-5978,"unrealized":34073,"income":0},"China":{"contribution":-0.18,"attribution":-354.3967,"abs_return":-1.2685,"total_gain":-859848,"ending_mv":66925993,"realized":0,"unrealized":-859848,"income":0},"USA":{"contribution":-0.38,"attribution":-787.4596,"abs_return":-3.0507,"total_gain":-1910558,"ending_mv":60715436,"realized":0,"unrealized":-1910558,"income":0},"Liquid":{"contribution":0.0,"attribution":2.2368,"abs_return":0.0088,"total_gain":5427,"ending_mv":7308920,"realized":19748,"unrealized":-14321,"income":0}}}}}}}};
+const SCHEMES=D.schemes,LEVELS=['asset_class','category','instrument'],LBL={asset_class:'Asset Class',category:'Category',instrument:'Instrument'};
+const SC={'Moderate (9)':{color:'#222A9C',pos:'rgba(34,42,156,.80)',neg:'rgba(34,42,156,.30)'},'Aggressive (10)':{color:'#FFC000',pos:'rgba(255,192,0,.85)',neg:'rgba(255,192,0,.30)'},'Equity (11)':{color:'#7BA0FF',pos:'rgba(123,160,255,.85)',neg:'rgba(123,160,255,.30)'}};
+const METRICS={1:'contribution',2:'contribution',3:'attribution',4:'attribution',5:'abs_return',6:'abs_return'};
+let curPeriod='MTD';
+const sLevel={1:'asset_class',2:'asset_class',3:'asset_class',4:'asset_class',5:'asset_class',6:'asset_class'},charts={};
+function p2(n){return n==null?'—':n.toFixed(2)+'%';}
+function vcls(n){return n==null?'vn':n>0?'vg':n<0?'vl':'vn';}
+function allKeys(level){const k=new Set();SCHEMES.forEach(s=>Object.keys((D.data[curPeriod]?.schemes[s]?.agg[level])||{}).forEach(x=>k.add(x)));return Array.from(k).sort();}
+function getVal(scheme,level,key,metric){const b=((D.data[curPeriod]?.schemes[scheme]?.agg[level])||{})[key];return b!=null?b[metric]:null;}
+function drawChart(sid,level,metric){const cid='c'+sid,canvas=document.getElementById(cid);if(!canvas)return;if(charts[cid])charts[cid].destroy();const bks=allKeys(level);const datasets=SCHEMES.map(s=>{const c=SC[s];const vals=bks.map(k=>{const v=getVal(s,level,k,metric);return v!=null?parseFloat(v.toFixed(4)):null;});return{label:s,data:vals,backgroundColor:vals.map(v=>v==null?'transparent':v>=0?c.pos:c.neg),borderColor:vals.map(v=>v==null?'transparent':c.color),borderWidth:1.5,borderRadius:4};});const ctx=canvas.getContext('2d');charts[cid]=new Chart(ctx,{type:'bar',data:{labels:bks,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#6B6460',font:{size:11,family:"'Reddit Sans',sans-serif"},boxWidth:12,padding:18,generateLabels:function(chart){return chart.data.datasets.map((ds,i)=>({text:ds.label,fillStyle:SC[ds.label].color,strokeStyle:SC[ds.label].color,lineWidth:0,hidden:false,datasetIndex:i}));}}},tooltip:{backgroundColor:'#fff',titleColor:'#1C1917',bodyColor:'#6B6460',borderColor:'#E2D9CC',borderWidth:1,callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y==null?'—':c.parsed.y.toFixed(2)+'%'}`}}},scales:{x:{ticks:{color:'#6B6460',font:{size:10,family:"'Reddit Sans',sans-serif"},maxRotation:35},grid:{display:false},border:{color:'#E2D9CC'}},y:{ticks:{color:'#6B6460',font:{size:10,family:"'Reddit Sans',sans-serif"},callback:v=>v.toFixed(1)+'%'},grid:{display:false},border:{color:'#E2D9CC'}}}}});}
+function buildTable(level,metric){const bks=allKeys(level);let h='<table><thead><tr class="sh"><th class="lft">'+LBL[level]+'</th><th class="mh">Moderate (9)</th><th class="ah">Aggressive (10)</th><th class="eh">Equity (11)</th></tr></thead><tbody>';bks.forEach(k=>{h+=`<tr><td class="lft">${k}</td>`;SCHEMES.forEach(s=>{const v=getVal(s,level,k,metric);h+=v===null?`<td class="na">—</td>`:`<td class="${vcls(v)}">${v.toFixed(2)}%</td>`;});h+='</tr>';});h+='<tr class="tot"><td class="lft">Total</td>';SCHEMES.forEach(s=>{const tot=Object.values((D.data[curPeriod]?.schemes[s]?.agg[level])||{}).reduce((a,b)=>a+(b[metric]||0),0);h+=`<td class="${vcls(tot)}">${tot.toFixed(2)}%</td>`;});h+='</tr></tbody></table>';return h;}
+function renderSection(sid){const level=sLevel[sid],metric=METRICS[sid];if(sid%2===1)drawChart(sid,level,metric);else document.getElementById('b'+sid).innerHTML=buildTable(level,metric);}
+function renderAll(){document.getElementById('period-str').textContent=D.data[curPeriod]?.period||'';[1,2,3,4,5,6].forEach(renderSection);}
+function setPeriod(pk){curPeriod=pk;document.querySelectorAll('.pbtn').forEach((b,i)=>{b.classList.toggle('active',['MTD','1M','SI'][i]===pk);});renderAll();}
+function setLevel(sid,level){sLevel[sid]=level;document.getElementById('t'+sid).querySelectorAll('.ltab').forEach((b,i)=>{b.classList.toggle('active',LEVELS[i]===level);});renderSection(sid);}
 renderAll();
-
-// ── Update period button labels with short date range after data loads ──────
-function updatePeriodBtnLabels(){
-  ['MTD','1M','SI'].forEach(pk => {
-    const btn = document.getElementById('pbtn-'+pk);
-    if(!btn) return;
-    const p = D.data[pk]?.period || '';
-    // Extract just start month+year for MTD/1M, keep "Since Inception" for SI
-    if(pk === 'SI'){
-      btn.textContent = 'Since Inception';
-    } else {
-      // period looks like "01 Mar 2026 – 20 Mar 2026"
-      const parts = p.split('–');
-      const start = (parts[0]||'').trim();  // "01 Mar 2026"
-      const tokens = start.split(' ');       // ["01","Mar","2026"]
-      const label = tokens.length >= 3 ? `${pk} (${tokens[1]} '${tokens[2].slice(2)})` : pk;
-      btn.textContent = label;
-    }
-  });
-}
-updatePeriodBtnLabels();
-
-// ── Export to Excel ──────────────────────────────────────────────────────────
-function exportToExcel(){
-  const wb = XLSX.utils.book_new();
-  const periodData = D.data[curPeriod];
-  const periodLabel = periodData?.period || curPeriod;
-  const LEVELS = ['asset_class','category','instrument'];
-  const LEVEL_NAMES = {'asset_class':'Asset Class','category':'Category','instrument':'Instrument'};
-  const METRIC_KEYS = ['contribution','attribution','abs_return'];
-  const METRIC_NAMES = {'contribution':'% Contribution','attribution':'% Attribution','abs_return':'% Abs Return'};
-
-  METRIC_KEYS.forEach(metric => {
-    LEVELS.forEach(level => {
-      const keys = D.all_keys[level] || [];
-      const sheetName = `${METRIC_NAMES[metric].replace('%','').trim()} - ${LEVEL_NAMES[level]}`.substring(0, 31);
-
-      // Header rows
-      const rows = [];
-      rows.push([`Allocate PMS — ${METRIC_NAMES[metric]}`,'','','']);
-      rows.push([`Period: ${periodLabel}`,'','','']);
-      rows.push([`Level: ${LEVEL_NAMES[level]}`,'','','']);
-      rows.push(['']); // blank row
-      rows.push([LEVEL_NAMES[level], 'Moderate (9)', 'Aggressive (10)', 'Equity (11)']);
-
-      keys.forEach(k => {
-        const row = [k];
-        SCHEMES.forEach(s => {
-          const v = getVal(s, level, k, metric);
-          row.push(v !== null ? parseFloat(v.toFixed(2)) : null);
-        });
-        rows.push(row);
-      });
-
-      // Total row
-      const totRow = ['Total'];
-      SCHEMES.forEach(s => {
-        const tot = Object.values((periodData?.schemes[s]?.agg[level]) || {})
-                          .reduce((a, b) => a + (b[metric] || 0), 0);
-        totRow.push(parseFloat(tot.toFixed(2)));
-      });
-      rows.push(totRow);
-
-      const ws = XLSX.utils.aoa_to_sheet(rows);
-
-      // Column widths
-      ws['!cols'] = [{wch:26},{wch:16},{wch:18},{wch:14}];
-
-      XLSX.utils.book_append_sheet(wb, ws, sheetName);
-    });
-  });
-
-  const periodSlug = periodLabel.replace(/[^a-zA-Z0-9]/g,'_');
-  XLSX.writeFile(wb, `Allocate_Attribution_${curPeriod}_${periodSlug}.xlsx`);
-}
 </script>
 </body>
 </html>
