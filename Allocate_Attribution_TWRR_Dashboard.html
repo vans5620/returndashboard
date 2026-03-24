@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Allocate Attribution &amp; TWRR Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Reddit+Sans:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font:   'Reddit Sans', system-ui, sans-serif;
+  --bg:     #F2F4F8;
+  --card:   #FFFFFF;
+  --border: #E2E6EF;
+  --navy:   #12205B;
+  --mod:    #222A9C;
+  --agg:    #F5A800;
+  --eqt:    #5B8DEF;
+  --pos:    #16A34A;
+  --neg:    #DC2626;
+  --text:   #111827;
+  --sub:    #6B7280;
+  --lite:   #EEF0F6;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ══ TOP BAR ══ */
+.top-bar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 58px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+}
+.allocate-badge {
+  background: var(--navy);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+.header-titles { flex-shrink: 0; }
+.header-titles h1 { font-size: 14px; font-weight: 700; line-height: 1.2; }
+.header-titles .sub { font-size: 11px; color: var(--sub); margin-top: 1px; }
+.vbar { width: 1px; height: 30px; background: var(--border); flex-shrink: 0; }
+
+.period-group { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.period-lbl { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--sub); }
+.period-pills {
+  display: flex; gap: 3px;
+  background: var(--bg);
+  border-radius: 7px;
+  padding: 3px;
+}
+.pp {
+  padding: 5px 14px; border-radius: 5px;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; border: none;
+  background: transparent; color: var(--sub);
+  transition: all 0.15s; font-family: var(--font);
+}
+.pp:hover { color: var(--text); }
+.pp.active { background: var(--navy); color: #fff; }
+
+.period-date { font-size: 11.5px; color: var(--sub); white-space: nowrap; }
+.period-date strong { color: var(--text); font-weight: 600; }
+
+.scheme-legend { display: flex; gap: 16px; margin-left: auto; flex-shrink: 0; }
+.leg { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+.leg-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* ══ SECTION NAV ══ */
+.snav {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display: flex;
+}
+.st {
+  font-size: 12.5px; font-weight: 600;
+  color: var(--sub);
+  padding: 12px 18px 11px;
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.15s;
+  font-family: var(--font);
+  background: none; border-top: none; border-left: none; border-right: none;
+  display: flex; align-items: center; gap: 7px;
+}
+.st:hover { color: var(--text); }
+.st.active { color: var(--navy); border-bottom-color: var(--navy); }
+.st .sb {
+  font-size: 10px; font-weight: 700;
+  background: var(--bg); color: var(--sub);
+  padding: 1px 6px; border-radius: 4px;
+}
+.st.active .sb { background: var(--navy); color: #fff; }
+
+/* ══ MAIN ══ */
+main { padding: 22px 28px; max-width: 1380px; margin: 0 auto; }
+.sp  { display: none; }
+.sp.active { display: flex; flex-direction: column; gap: 16px; }
+
+/* ══ CARD ══ */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.card-head {
+  padding: 16px 20px 0;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.card-head-l { display: flex; align-items: center; gap: 10px; }
+.sec-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.4px;
+  color: var(--sub); background: var(--bg); border: 1px solid var(--border);
+  padding: 3px 8px; border-radius: 5px; text-transform: uppercase; white-space: nowrap;
+}
+.card-title  { font-size: 13.5px; font-weight: 700; }
+.card-note   { font-size: 11px; color: var(--sub); padding-top: 3px; text-align: right; }
+
+/* Granularity tabs */
+.gtabs {
+  display: flex; padding: 13px 20px 0;
+  border-bottom: 1px solid var(--lite);
+}
+.gt {
+  font-size: 12.5px; font-weight: 500;
+  color: var(--sub);
+  padding: 5px 0 9px; margin-right: 22px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: all 0.15s;
+  font-family: var(--font);
+  background: none; border-top: none; border-left: none; border-right: none;
+}
+.gt:hover { color: var(--text); }
+.gt.active { color: var(--navy); border-bottom-color: var(--navy); font-weight: 600; }
+
+/* Chart */
+.chart-body { padding: 20px; }
+.chart-wrap  { position: relative; width: 100%; }
+
+/* Table */
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th {
+  padding: 11px 18px; text-align: right;
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+  color: #fff; border-bottom: 1px solid var(--border);
+}
+.tbl th.lh { text-align: left; background: #F8F9FC; color: var(--sub); }
+.tbl th.mh { background: var(--mod); }
+.tbl th.ah { background: var(--agg); color: var(--navy); }
+.tbl th.eh { background: var(--eqt); }
+.tbl td {
+  padding: 10px 18px; border-bottom: 1px solid var(--lite);
+  text-align: right; font-variant-numeric: tabular-nums;
+}
+.tbl td.lc { text-align: left; font-weight: 500; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: #F8FAFF; }
+.tbl .tot td {
+  font-weight: 700; background: #F4F6FB !important;
+  border-top: 1.5px solid var(--border);
+  font-size: 12.5px;
+}
+.pos { color: var(--pos); font-weight: 600; }
+.neg { color: var(--neg); font-weight: 600; }
+.zer { color: var(--sub); }
+.dsh { color: #C5CBD8; }
+
+/* Placeholder */
+.ph {
+  background: var(--card); border: 2px dashed var(--border);
+  border-radius: 12px; padding: 64px 24px; text-align: center;
+}
+.ph .phi { font-size: 36px; margin-bottom: 12px; }
+.ph h3   { font-size: 16px; font-weight: 700; margin-bottom: 7px; }
+.ph p    { font-size: 12.5px; color: var(--sub); line-height: 1.7; }
+
+footer {
+  text-align: center; padding: 20px;
+  font-size: 11px; color: var(--sub); margin-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="top-bar">
+  <div class="allocate-badge">ALLOCATE</div>
+  <div class="header-titles">
+    <h1>Attribution &amp; TWRR Dashboard</h1>
+    <div class="sub">Ionic Allocate PMS &mdash; Schemes 9 &middot; 10 &middot; 11</div>
+  </div>
+  <div class="vbar"></div>
+  <div class="period-group">
+    <span class="period-lbl">Period</span>
+    <div class="period-pills">
+      <button class="pp active" onclick="setPeriod('MTD',this)">MTD</button>
+      <button class="pp"        onclick="setPeriod('1M',this)">1M</button>
+      <button class="pp"        onclick="setPeriod('SI',this)">Since Inception</button>
+    </div>
+  </div>
+  <div class="period-date" id="pd">Period: <strong>01/03/2026 to 23/03/2026</strong></div>
+  <div class="scheme-legend">
+    <div class="leg"><div class="leg-dot" style="background:var(--mod)"></div>Moderate (9)</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--agg)"></div>Aggressive (10)</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--eqt)"></div>Equity (11)</div>
+  </div>
+</header>
+
+<!-- SECTION NAV -->
+<nav class="snav">
+  <button class="st active" onclick="showSec('s1',this)">% Contribution <span class="sb">S1</span></button>
+  <button class="st"        onclick="showSec('s2',this)">Absolute Return TWRR <span class="sb">S2</span></button>
+  <button class="st"        onclick="showSec('s3',this)">Client Outperformance <span class="sb">S3</span></button>
+</nav>
+
+<main>
+
+  <!-- ── S1: CONTRIBUTION ── -->
+  <div id="s1" class="sp active">
+
+    <!-- Chart -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-l">
+          <span class="sec-badge">Section 1</span>
+          <span class="card-title">% Contribution to Portfolio Return &mdash; Chart</span>
+        </div>
+        <div class="card-note">Sum of Contribution column from CA file, grouped by bucket</div>
+      </div>
+      <div class="gtabs" id="gc">
+        <button class="gt active" onclick="setGran('c','asset_class',this)">Asset Class</button>
+        <button class="gt"        onclick="setGran('c','category',this)">Category</button>
+        <button class="gt"        onclick="setGran('c','instrument',this)">Instrument</button>
+      </div>
+      <div class="chart-body">
+        <div class="chart-wrap" id="cw"><canvas id="cv"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-l">
+          <span class="sec-badge">Section 2</span>
+          <span class="card-title">% Contribution to Portfolio Return &mdash; Table</span>
+        </div>
+        <div class="card-note">All values in % &mdash; 2 decimal places</div>
+      </div>
+      <div class="gtabs" id="gt">
+        <button class="gt active" onclick="setGran('t','asset_class',this)">Asset Class</button>
+        <button class="gt"        onclick="setGran('t','category',this)">Category</button>
+        <button class="gt"        onclick="setGran('t','instrument',this)">Instrument</button>
+      </div>
+      <table class="tbl">
+        <thead><tr id="th"></tr></thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ── S2: TWRR ── -->
+  <div id="s2" class="sp">
+
+    <!-- TWRR methodology note -->
+    <div style="background:#EEF2FF;border:1px solid #C7D2FE;border-radius:8px;padding:10px 16px;font-size:12px;color:#3730A3;display:flex;align-items:center;gap:8px;">
+      <strong>Methodology:</strong>&nbsp;Daily TWRR via NAV / stock prices where available; Modified Dietz (ROIC basis) fallback for bonds.
+      Formula: R<sub>t</sub> = (MV<sub>t</sub> &minus; MV<sub>t&minus;1</sub> &minus; Flow<sub>t</sub>) / MV<sub>t&minus;1</sub>&nbsp;&bull;&nbsp;Chain-linked TWRR = &prod;(1+R<sub>t</sub>)&minus;1.
+    </div>
+
+    <!-- TWRR Chart -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-l">
+          <span class="sec-badge">Section 2</span>
+          <span class="card-title">Absolute Return TWRR &mdash; Chart</span>
+        </div>
+        <div class="card-note">Each bar = bucket-level TWRR over selected period</div>
+      </div>
+      <div class="gtabs" id="tgc">
+        <button class="gt active" onclick="setGranTwrr('c','asset_class',this)">Asset Class</button>
+        <button class="gt"        onclick="setGranTwrr('c','category',this)">Category</button>
+        <button class="gt"        onclick="setGranTwrr('c','instrument',this)">Instrument</button>
+      </div>
+      <div class="chart-body">
+        <div class="chart-wrap" id="tcw"><canvas id="tcv"></canvas></div>
+      </div>
+    </div>
+
+    <!-- TWRR Table -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-l">
+          <span class="sec-badge">Section 2</span>
+          <span class="card-title">Absolute Return TWRR &mdash; Table</span>
+        </div>
+        <div class="card-note">All values in % &mdash; 2 decimal places &bull; &mdash; = not applicable for scheme</div>
+      </div>
+      <div class="gtabs" id="tgt">
+        <button class="gt active" onclick="setGranTwrr('t','asset_class',this)">Asset Class</button>
+        <button class="gt"        onclick="setGranTwrr('t','category',this)">Category</button>
+        <button class="gt"        onclick="setGranTwrr('t','instrument',this)">Instrument</button>
+      </div>
+      <table class="tbl">
+        <thead><tr id="tth"></tr></thead>
+        <tbody id="ttb"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ── S3: CLIENT OUTPERFORMANCE ── -->
+  <div id="s3" class="sp">
+
+    <!-- Methodology note -->
+    <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:10px 16px;font-size:12px;color:#166534;display:flex;align-items:center;gap:8px;">
+      <strong>Outperformance (α)</strong>&nbsp;= Client Since-Inception Return &minus; Fee Reference Index Return.
+      Source: Performance History by Account file &bull; Daily valuation TWRR &bull; Pre-tax, post-fee.
+    </div>
+
+    <!-- Scheme selector tabs (within S3) -->
+    <div class="card" style="overflow:visible">
+      <div class="card-head" style="padding-bottom:0">
+        <div class="card-head-l">
+          <span class="sec-badge">Section 3</span>
+          <span class="card-title">Client Outperformance vs Fee Reference Index <span style="font-size:12px;font-weight:400;color:var(--sub)">(Since Inception, % of AUM)</span></span>
+        </div>
+      </div>
+
+      <!-- Date toggle -->
+      <div style="padding:10px 20px 0;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--lite);padding-bottom:10px;">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--sub)">As of:</span>
+        <div id="s3-date-pills" class="period-pills" style="background:var(--bg);">
+          <button class="pp active" style="font-size:11px;padding:4px 12px;" onclick="setS3Date('mar',this)">24 Mar 2026</button>
+          <button class="pp"        style="font-size:11px;padding:4px 12px;" onclick="setS3Date('feb',this)">28 Feb 2026</button>
+        </div>
+        <span id="s3-excl-note" style="font-size:11px;color:var(--sub);margin-left:4px;"></span>
+      </div>
+
+      <!-- Summary table -->
+      <div style="padding:16px 20px 0;overflow-x:auto;">
+        <table id="s3-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:8px 10px;background:#F8FAFC;border-bottom:2px solid #E2E8F0;font-size:12px;font-weight:700;color:#374151;min-width:160px">Scheme</th>
+              <th style="text-align:right;padding:8px 10px;background:#DCFCE7;border-bottom:2px solid #16A34A;font-size:12px;font-weight:700;color:#15803D;min-width:80px">&gt;4%</th>
+              <th style="text-align:right;padding:8px 10px;background:#F0FDF4;border-bottom:2px solid #4ADE80;font-size:12px;font-weight:700;color:#15803D;min-width:80px">2&#8211;4%</th>
+              <th style="text-align:right;padding:8px 10px;background:#FEFCE8;border-bottom:2px solid #EAB308;font-size:12px;font-weight:700;color:#854D0E;min-width:80px">0&#8211;2%</th>
+              <th style="text-align:right;padding:8px 10px;background:#FFF7ED;border-bottom:2px solid #F97316;font-size:12px;font-weight:700;color:#C2410C;min-width:90px">0 to &#8722;1%</th>
+              <th style="text-align:right;padding:8px 10px;background:#FEF2F2;border-bottom:2px solid #DC2626;font-size:12px;font-weight:700;color:#B91C1C;min-width:80px">&lt;&#8722;1%</th>
+              <th style="text-align:right;padding:8px 10px;background:#EFF6FF;border-bottom:2px solid #3B82F6;font-size:12px;font-weight:700;color:#1D4ED8;min-width:100px">Avg &#945;</th>
+            </tr>
+          </thead>
+          <tbody id="s3-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Stacked bar chart -->
+      <div style="padding:16px 20px 8px;height:280px;position:relative;">
+        <canvas id="s3-canvas"></canvas>
+      </div>
+
+      <!-- Fee reference note -->
+      <div style="padding:0 20px 16px">
+        <div id="s3-feeref-note" style="font-size:11px;color:var(--sub);border-top:1px solid var(--lite);padding-top:8px;line-height:1.6;"></div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+<footer>Allocate PMS &middot; Ionic Wealth Management &middot; Internal Use Only</footer>
+
+<script>
+/* ─ DATA ───────────────────────────────────────────────────── */
+const D = {"MTD":{"9":{"asset_class":[{"l":"Fixed Income","v":0.13},{"l":"Liquid","v":0.01},{"l":"Alternates","v":-2.58},{"l":"Equity","v":-3.68}],"category":[{"l":"Corporate Bonds","v":0.19},{"l":"Liquid","v":0.01},{"l":"ESS","v":-0.06},{"l":"InVITs","v":-0.09},{"l":"International Equity","v":-0.37},{"l":"Commodities","v":-2.49},{"l":"Domestic Equity","v":-3.31}],"instrument":[{"l":"Corporate Bonds","v":0.19},{"l":"Liquid","v":0.01},{"l":"Emerging Market","v":-0.03},{"l":"ESS","v":-0.06},{"l":"Large Cap","v":-0.07},{"l":"Small Cap","v":-0.07},{"l":"Mid Cap","v":-0.08},{"l":"InVITs","v":-0.09},{"l":"USA","v":-0.14},{"l":"China","v":-0.2},{"l":"Tactical","v":-0.51},{"l":"Silver","v":-0.61},{"l":"Flexi Cap","v":-0.63},{"l":"Factor","v":-0.91},{"l":"Direct Equity","v":-1.04},{"l":"Gold","v":-1.88}]},"10":{"asset_class":[{"l":"Liquid","v":0.01},{"l":"Fixed Income","v":-0.01},{"l":"Alternates","v":-1.26},{"l":"Equity","v":-6.1}],"category":[{"l":"Liquid","v":0.01},{"l":"Corporate Bonds","v":0.0},{"l":"ESS","v":-0.01},{"l":"InVITs","v":-0.05},{"l":"International Equity","v":-0.65},{"l":"Commodities","v":-1.21},{"l":"Domestic Equity","v":-5.45}],"instrument":[{"l":"Liquid","v":0.01},{"l":"Corporate Bonds","v":0.0},{"l":"Emerging Market","v":-0.01},{"l":"ESS","v":-0.01},{"l":"InVITs","v":-0.05},{"l":"Mid Cap","v":-0.1},{"l":"Small Cap","v":-0.18},{"l":"USA","v":-0.25},{"l":"Silver","v":-0.34},{"l":"China","v":-0.39},{"l":"Gold","v":-0.87},{"l":"Flexi Cap","v":-1.02},{"l":"Tactical","v":-1.08},{"l":"Factor","v":-1.27},{"l":"Direct Equity","v":-1.8}]},"11":{"asset_class":[{"l":"Alternates","v":0.0},{"l":"Fixed Income","v":0.0},{"l":"Liquid","v":0.0},{"l":"Equity","v":-6.87}],"category":[{"l":"Commodities","v":0.0},{"l":"Corporate Bonds","v":0.0},{"l":"Liquid","v":0.0},{"l":"International Equity","v":-0.95},{"l":"Domestic Equity","v":-5.92}],"instrument":[{"l":"Corporate Bonds","v":0.0},{"l":"Silver","v":0.0},{"l":"Liquid","v":0.0},{"l":"Large Cap","v":0.0},{"l":"Gold","v":0.0},{"l":"Emerging Market","v":-0.01},{"l":"Small Cap","v":-0.12},{"l":"USA","v":-0.32},{"l":"China","v":-0.62},{"l":"Mid Cap","v":-0.86},{"l":"Tactical","v":-1.45},{"l":"Factor","v":-1.47},{"l":"Flexi Cap","v":-2.02}]}},"1M":{"9":{"asset_class":[{"l":"Fixed Income","v":0.05},{"l":"Liquid","v":0.01},{"l":"Equity","v":0.0},{"l":"Alternates","v":-0.39}],"category":[{"l":"Domestic Equity","v":0.24},{"l":"InVITs","v":0.24},{"l":"Corporate Bonds","v":0.07},{"l":"Liquid","v":0.01},{"l":"ESS","v":-0.02},{"l":"International Equity","v":-0.24},{"l":"Commodities","v":-0.63}],"instrument":[{"l":"InVITs","v":0.24},{"l":"Corporate Bonds","v":0.07},{"l":"Small Cap","v":0.07},{"l":"Tactical","v":0.05},{"l":"Mid Cap","v":0.05},{"l":"Factor","v":0.04},{"l":"Large Cap","v":0.03},{"l":"Flexi Cap","v":0.02},{"l":"Liquid","v":0.01},{"l":"Emerging Market","v":0.0},{"l":"Gold","v":-0.02},{"l":"Direct Equity","v":-0.02},{"l":"ESS","v":-0.02},{"l":"China","v":-0.08},{"l":"USA","v":-0.16},{"l":"Silver","v":-0.61}]},"10":{"asset_class":[{"l":"Fixed Income","v":0.02},{"l":"Liquid","v":0.01},{"l":"Alternates","v":-0.06},{"l":"Equity","v":-0.16}],"category":[{"l":"Domestic Equity","v":0.29},{"l":"InVITs","v":0.25},{"l":"Corporate Bonds","v":0.02},{"l":"Liquid","v":0.01},{"l":"ESS","v":0.0},{"l":"Commodities","v":-0.31},{"l":"International Equity","v":-0.45}],"instrument":[{"l":"InVITs","v":0.25},{"l":"Small Cap","v":0.11},{"l":"Factor","v":0.1},{"l":"Mid Cap","v":0.07},{"l":"Tactical","v":0.07},{"l":"Corporate Bonds","v":0.02},{"l":"Liquid","v":0.01},{"l":"Flexi Cap","v":0.01},{"l":"Gold","v":0.01},{"l":"ESS","v":0.0},{"l":"Emerging Market","v":0.0},{"l":"Direct Equity","v":-0.07},{"l":"China","v":-0.14},{"l":"USA","v":-0.31},{"l":"Silver","v":-0.32}]},"11":{"asset_class":[{"l":"Equity","v":0.03},{"l":"Alternates","v":0.0},{"l":"Fixed Income","v":0.0},{"l":"Liquid","v":0.0}],"category":[{"l":"Domestic Equity","v":0.59},{"l":"Commodities","v":0.0},{"l":"Corporate Bonds","v":0.0},{"l":"Liquid","v":0.0},{"l":"International Equity","v":-0.56}],"instrument":[{"l":"Mid Cap","v":0.27},{"l":"Factor","v":0.18},{"l":"Tactical","v":0.15},{"l":"Small Cap","v":0.05},{"l":"Large Cap","v":0.01},{"l":"Liquid","v":0.0},{"l":"Corporate Bonds","v":0.0},{"l":"Gold","v":0.0},{"l":"Silver","v":0.0},{"l":"Flexi Cap","v":-0.07},{"l":"China","v":-0.18},{"l":"USA","v":-0.38}]}},"SI":{"9":{"asset_class":[{"l":"Alternates","v":17.85},{"l":"Fixed Income","v":2.11},{"l":"Equity","v":1.28},{"l":"Liquid","v":0.41}],"category":[{"l":"Commodities","v":16.81},{"l":"Corporate Bonds","v":2.19},{"l":"International Equity","v":2.06},{"l":"InVITs","v":1.04},{"l":"Liquid","v":0.41},{"l":"ESS","v":-0.08},{"l":"Domestic Equity","v":-0.78}],"instrument":[{"l":"Silver","v":12.62},{"l":"Gold","v":4.19},{"l":"Corporate Bonds","v":2.19},{"l":"China","v":1.5},{"l":"InVITs","v":1.04},{"l":"USA","v":0.59},{"l":"Liquid","v":0.41},{"l":"Flexi Cap","v":0.16},{"l":"Large Cap","v":0.03},{"l":"Emerging Market","v":-0.03},{"l":"ESS","v":-0.08},{"l":"Mid Cap","v":-0.08},{"l":"Small Cap","v":-0.13},{"l":"Direct Equity","v":-0.18},{"l":"Tactical","v":-0.25},{"l":"Factor","v":-0.33}]},"10":{"asset_class":[{"l":"Alternates","v":8.75},{"l":"Equity","v":3.41},{"l":"Fixed Income","v":0.42},{"l":"Liquid","v":0.39}],"category":[{"l":"Commodities","v":7.96},{"l":"International Equity","v":2.43},{"l":"Domestic Equity","v":0.98},{"l":"InVITs","v":0.79},{"l":"Corporate Bonds","v":0.43},{"l":"Liquid","v":0.39},{"l":"ESS","v":-0.01}],"instrument":[{"l":"Silver","v":5.42},{"l":"Gold","v":2.54},{"l":"China","v":2.14},{"l":"Flexi Cap","v":0.84},{"l":"InVITs","v":0.79},{"l":"Direct Equity","v":0.52},{"l":"Corporate Bonds","v":0.43},{"l":"Liquid","v":0.39},{"l":"USA","v":0.3},{"l":"Large Cap","v":0.27},{"l":"Factor","v":0.15},{"l":"ESS","v":-0.01},{"l":"Emerging Market","v":-0.01},{"l":"Mid Cap","v":-0.07},{"l":"Small Cap","v":-0.24},{"l":"Tactical","v":-0.49}]},"11":{"asset_class":[{"l":"Equity","v":2.27},{"l":"Liquid","v":0.75},{"l":"Alternates","v":0.06},{"l":"Fixed Income","v":0.0}],"category":[{"l":"International Equity","v":2.57},{"l":"Liquid","v":0.75},{"l":"Commodities","v":0.09},{"l":"Corporate Bonds","v":0.0},{"l":"InVITs","v":-0.03},{"l":"Domestic Equity","v":-0.3}],"instrument":[{"l":"China","v":2.23},{"l":"Liquid","v":0.75},{"l":"USA","v":0.35},{"l":"Mid Cap","v":0.31},{"l":"Large Cap","v":0.27},{"l":"Gold","v":0.14},{"l":"Direct Equity","v":0.02},{"l":"Factor","v":0.01},{"l":"Corporate Bonds","v":0.0},{"l":"Emerging Market","v":-0.01},{"l":"InVITs","v":-0.03},{"l":"Silver","v":-0.05},{"l":"Small Cap","v":-0.14},{"l":"Flexi Cap","v":-0.17},{"l":"Tactical","v":-0.6}]}}};
+
+const PD = { MTD:'01/03/2026 to 23/03/2026', '1M':'01/02/2026 to 28/02/2026', SI:'21/03/2025 to 23/03/2026' };
+const LL = { asset_class:'Asset Class', category:'Category', instrument:'Instrument' };
+const st = { period:'MTD', cl:'asset_class', tl:'asset_class' };
+let ci = null;
+
+/* ─ NAV ─ */
+function showSec(id, btn) {
+  document.querySelectorAll('.sp').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.st').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if (id==='s2') renderTwrr();
+  if (id==='s3') renderS3();
+}
+
+/* ─ PERIOD ─ */
+function setPeriod(p, btn) {
+  st.period = p;
+  document.querySelectorAll('.period-pills .pp').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pd').innerHTML = `Period: <strong>${PD[p]}</strong>`;
+  render();
+}
+
+/* ─ GRANULARITY ─ */
+function setGran(which, level, btn) {
+  if (which==='c') {
+    st.cl = level;
+    document.querySelectorAll('#gc .gt').forEach(b=>b.classList.remove('active'));
+  } else {
+    st.tl = level;
+    document.querySelectorAll('#gt .gt').forEach(b=>b.classList.remove('active'));
+  }
+  btn.classList.add('active');
+  render();
+}
+
+/* ─ HELPERS ─ */
+function unionLabels(period, level) {
+  const m = new Map();
+  ['9','10','11'].forEach(s => {
+    (D[period][s][level]||[]).forEach(r => { m.set(r.l, (m.get(r.l)||0) + r.v); });
+  });
+  return [...m.entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+}
+function get(period, sid, level, label) {
+  const row = (D[period][sid][level]||[]).find(r=>r.l===label);
+  return row ? row.v : null;
+}
+function fmt(v) {
+  if (v===null) return '&mdash;';
+  const s = v > 0.005 ? '+' : '';
+  return `${s}${v.toFixed(2)}%`;
+}
+function vc(v) {
+  if (v===null) return 'dsh';
+  if (v > 0.005) return 'pos';
+  if (v < -0.005) return 'neg';
+  return 'zer';
+}
+
+/* ─ CHART ─ */
+function renderChart() {
+  const {period, cl} = st;
+  const labels = unionLabels(period, cl);
+  const h = Math.max(280, labels.length * (labels.length > 10 ? 34 : 48));
+  document.getElementById('cw').style.height = h + 'px';
+
+  if (ci) ci.destroy();
+  ci = new Chart(document.getElementById('cv').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label:'Moderate (9)',    data: labels.map(l=>get(period,'9',cl,l)),  backgroundColor:'rgba(34,42,156,0.82)',  borderColor:'#222A9C', borderWidth:1.5, borderRadius:3, borderSkipped:false },
+        { label:'Aggressive (10)', data: labels.map(l=>get(period,'10',cl,l)), backgroundColor:'rgba(245,168,0,0.82)',  borderColor:'#D49500', borderWidth:1.5, borderRadius:3, borderSkipped:false },
+        { label:'Equity (11)',     data: labels.map(l=>get(period,'11',cl,l)), backgroundColor:'rgba(91,141,239,0.82)', borderColor:'#4A7FE0', borderWidth:1.5, borderRadius:3, borderSkipped:false },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: {
+        legend: {
+          display:true, position:'top', align:'center',
+          labels:{ boxWidth:12, boxHeight:12, font:{family:"'Reddit Sans',sans-serif",size:12,weight:'600'}, color:'#374151', padding:16 }
+        },
+        tooltip: {
+          callbacks:{ label: c => { const v=c.raw; return v===null ? ` ${c.dataset.label}: —` : ` ${c.dataset.label}: ${v>=0?'+':''}${v.toFixed(2)}%`; } },
+          titleFont:{family:"'Reddit Sans',sans-serif"}, bodyFont:{family:"'Reddit Sans',sans-serif"},
+        }
+      },
+      scales: {
+        x: { grid:{color:'#EEF0F8'}, ticks:{font:{family:"'Reddit Sans',sans-serif",size:11},color:'#6B7280'}, border:{dash:[4,4],color:'#E2E6EF'} },
+        y: { grid:{color:'#EEF0F8'}, ticks:{callback:v=>v.toFixed(1)+'%',font:{family:"'Reddit Sans',sans-serif",size:11},color:'#6B7280'}, border:{dash:[4,4],color:'#E2E6EF'} }
+      }
+    }
+  });
+}
+
+/* ─ TABLE ─ */
+function renderTable() {
+  const {period, tl} = st;
+  const labels = unionLabels(period, tl);
+
+  document.getElementById('th').innerHTML = `
+    <th class="lh">${LL[tl]}</th>
+    <th class="mh">MODERATE (9)</th>
+    <th class="ah">AGGRESSIVE (10)</th>
+    <th class="eh">EQUITY (11)</th>`;
+
+  let t9=0, t10=0, t11=0;
+  const rows = labels.map(label => {
+    const v9  = get(period,'9',tl,label);
+    const v10 = get(period,'10',tl,label);
+    const v11 = get(period,'11',tl,label);
+    if(v9!==null) t9+=v9; if(v10!==null) t10+=v10; if(v11!==null) t11+=v11;
+    return `<tr><td class="lc">${label}</td><td class="${vc(v9)}">${fmt(v9)}</td><td class="${vc(v10)}">${fmt(v10)}</td><td class="${vc(v11)}">${fmt(v11)}</td></tr>`;
+  });
+  rows.push(`<tr class="tot"><td class="lc">TOTAL</td><td class="${vc(t9)}">${fmt(t9)}</td><td class="${vc(t10)}">${fmt(t10)}</td><td class="${vc(t11)}">${fmt(t11)}</td></tr>`);
+  document.getElementById('tb').innerHTML = rows.join('');
+}
+
+function render() {
+  renderChart(); renderTable();
+  // If S2 is active, also render TWRR
+  if (document.getElementById('s2').classList.contains('active')) renderTwrr();
+}
+document.addEventListener('DOMContentLoaded', () => {
+  render();
+  // Pre-fill S3 client counts (table renders on first visit)
+  ['9','10','11'].forEach(function(s) {
+    const el = document.getElementById('s3cnt'+s);
+    if (el && P && P[s]) el.textContent = '('+P[s].length+' clients)';
+  });
+});
+
+/* ─ TWRR DATA ─────────────────────────────────────────────── */
+const T = {"MTD":{"9":{"asset_class":[{"l":"Liquid","v":0.19},{"l":"Fixed Income","v":-1.73},{"l":"Equity","v":-8.31},{"l":"Alternates","v":-10.16}],"category":[{"l":"Corporate Bonds","v":1.21},{"l":"Liquid","v":0.19},{"l":"ESS","v":-1.73},{"l":"InVITs","v":-2.68},{"l":"International Equity","v":-2.73},{"l":"Domestic Equity","v":-9.95},{"l":"Commodities","v":-18.41}],"instrument":[{"l":"Corporate Bonds","v":1.21},{"l":"Liquid","v":0.19},{"l":"USA","v":-1.57},{"l":"ESS","v":-1.73},{"l":"InVITs","v":-2.68},{"l":"China","v":-3.25},{"l":"Emerging Market","v":-8.28},{"l":"Flexi Cap","v":-9.17},{"l":"Small Cap","v":-9.21},{"l":"Mid Cap","v":-9.45},{"l":"Large Cap","v":-9.48},{"l":"Factor","v":-9.53},{"l":"Tactical","v":-10.01},{"l":"Direct Equity","v":-11.63},{"l":"Silver","v":-18.24},{"l":"Gold","v":-18.41}]},"10":{"asset_class":[{"l":"Liquid","v":0.2},{"l":"Fixed Income","v":-1.73},{"l":"Alternates","v":-2.7},{"l":"Equity","v":-8.13}],"category":[{"l":"Liquid","v":0.2},{"l":"Corporate Bonds","v":-0.79},{"l":"ESS","v":-1.73},{"l":"International Equity","v":-2.41},{"l":"InVITs","v":-2.54},{"l":"Domestic Equity","v":-9.98},{"l":"Commodities","v":-18.47}],"instrument":[{"l":"Liquid","v":0.2},{"l":"Corporate Bonds","v":-0.79},{"l":"USA","v":-1.57},{"l":"ESS","v":-1.73},{"l":"InVITs","v":-2.54},{"l":"China","v":-3.25},{"l":"Emerging Market","v":-8.28},{"l":"Flexi Cap","v":-9.18},{"l":"Small Cap","v":-9.21},{"l":"Mid Cap","v":-9.45},{"l":"Factor","v":-9.53},{"l":"Tactical","v":-9.99},{"l":"Direct Equity","v":-11.6},{"l":"Silver","v":-15.02},{"l":"Gold","v":-18.47}]},"11":{"asset_class":[{"l":"Liquid","v":0.17},{"l":"Fixed Income","v":0.0},{"l":"Equity","v":-7.42}],"category":[{"l":"Liquid","v":0.17},{"l":"Corporate Bonds","v":0.0},{"l":"International Equity","v":-2.47},{"l":"Domestic Equity","v":-9.11}],"instrument":[{"l":"Liquid","v":0.17},{"l":"Corporate Bonds","v":0.0},{"l":"USA","v":-1.57},{"l":"China","v":-3.25},{"l":"Flexi Cap","v":-8.2},{"l":"Emerging Market","v":-8.28},{"l":"Small Cap","v":-9.16},{"l":"Mid Cap","v":-9.56},{"l":"Factor","v":-9.6},{"l":"Tactical","v":-10.07}]}},"1M":{"9":{"asset_class":[{"l":"Alternates","v":4.89},{"l":"Equity","v":1.11},{"l":"Liquid","v":0.23},{"l":"Fixed Income","v":-0.28}],"category":[{"l":"Commodities","v":6.99},{"l":"InVITs","v":4.16},{"l":"Domestic Equity","v":1.75},{"l":"Corporate Bonds","v":0.35},{"l":"Liquid","v":0.23},{"l":"ESS","v":-0.28},{"l":"International Equity","v":-0.76}],"instrument":[{"l":"Gold","v":6.99},{"l":"Emerging Market","v":6.3},{"l":"Small Cap","v":4.82},{"l":"InVITs","v":4.16},{"l":"Tactical","v":3.52},{"l":"Mid Cap","v":2.92},{"l":"Factor","v":1.72},{"l":"Direct Equity","v":1.35},{"l":"Flexi Cap","v":0.81},{"l":"China","v":0.65},{"l":"Large Cap","v":0.38},{"l":"Corporate Bonds","v":0.35},{"l":"Liquid","v":0.23},{"l":"ESS","v":-0.28},{"l":"USA","v":-3.05},{"l":"Silver","v":-8.17}]},"10":{"asset_class":[{"l":"Alternates","v":4.89},{"l":"Equity","v":1.14},{"l":"Liquid","v":0.26},{"l":"Fixed Income","v":-0.29}],"category":[{"l":"InVITs","v":4.89},{"l":"Domestic Equity","v":1.98},{"l":"Commodities","v":0.62},{"l":"Corporate Bonds","v":0.56},{"l":"Liquid","v":0.26},{"l":"ESS","v":-0.29},{"l":"International Equity","v":-1.29}],"instrument":[{"l":"Emerging Market","v":6.34},{"l":"InVITs","v":4.89},{"l":"Small Cap","v":4.83},{"l":"Tactical","v":3.56},{"l":"Mid Cap","v":2.88},{"l":"Factor","v":1.94},{"l":"Direct Equity","v":1.41},{"l":"Flexi Cap","v":0.91},{"l":"China","v":0.62},{"l":"Gold","v":0.62},{"l":"Corporate Bonds","v":0.56},{"l":"Liquid","v":0.26},{"l":"ESS","v":-0.29},{"l":"USA","v":-3.05},{"l":"Silver","v":-9.19}]},"11":{"asset_class":[{"l":"Equity","v":1.07},{"l":"Fixed Income","v":0.97},{"l":"Liquid","v":0.26}],"category":[{"l":"Domestic Equity","v":1.8},{"l":"Corporate Bonds","v":0.97},{"l":"Liquid","v":0.26},{"l":"International Equity","v":-1.15}],"instrument":[{"l":"Small Cap","v":4.89},{"l":"Tactical","v":3.58},{"l":"Mid Cap","v":3.09},{"l":"Large Cap","v":2.89},{"l":"Factor","v":2.0},{"l":"Corporate Bonds","v":0.97},{"l":"China","v":0.62},{"l":"Flexi Cap","v":0.41},{"l":"Liquid","v":0.26},{"l":"USA","v":-3.05}]}},"SI":{"9":{"asset_class":[{"l":"Fixed Income","v":4.06},{"l":"Liquid","v":1.77},{"l":"Alternates","v":-14.56},{"l":"Equity","v":-19.07}],"category":[{"l":"International Equity","v":37.9},{"l":"ESS","v":4.06},{"l":"Corporate Bonds","v":2.01},{"l":"Liquid","v":1.77},{"l":"InVITs","v":-9.18},{"l":"Commodities","v":-10.82},{"l":"Domestic Equity","v":-24.28}],"instrument":[{"l":"Silver","v":54.79},{"l":"China","v":49.42},{"l":"USA","v":27.76},{"l":"ESS","v":4.06},{"l":"Corporate Bonds","v":2.01},{"l":"Liquid","v":1.77},{"l":"Tactical","v":1.75},{"l":"Flexi Cap","v":-2.35},{"l":"Factor","v":-2.47},{"l":"Large Cap","v":-4.53},{"l":"InVITs","v":-9.18},{"l":"Emerging Market","v":-9.31},{"l":"Mid Cap","v":-9.35},{"l":"Gold","v":-10.82},{"l":"Small Cap","v":-12.87},{"l":"Direct Equity","v":-31.28}]},"10":{"asset_class":[{"l":"Liquid","v":3.66},{"l":"Equity","v":1.84},{"l":"Fixed Income","v":-2.62},{"l":"Alternates","v":-21.57}],"category":[{"l":"International Equity","v":27.56},{"l":"Liquid","v":3.66},{"l":"Corporate Bonds","v":0.64},{"l":"ESS","v":-2.62},{"l":"Domestic Equity","v":-4.03},{"l":"Commodities","v":-13.64},{"l":"InVITs","v":-21.47}],"instrument":[{"l":"Silver","v":67.53},{"l":"China","v":35.37},{"l":"USA","v":17.05},{"l":"Liquid","v":3.66},{"l":"Mid Cap","v":2.03},{"l":"Tactical","v":0.74},{"l":"Corporate Bonds","v":0.64},{"l":"Small Cap","v":0.4},{"l":"Flexi Cap","v":-0.27},{"l":"Factor","v":-2.25},{"l":"ESS","v":-2.62},{"l":"Large Cap","v":-2.99},{"l":"Emerging Market","v":-9.28},{"l":"Direct Equity","v":-12.74},{"l":"Gold","v":-13.64},{"l":"InVITs","v":-21.47}]},"11":{"asset_class":[{"l":"Alternates","v":19.91},{"l":"Equity","v":4.62},{"l":"Liquid","v":2.48},{"l":"Fixed Income","v":0.17}],"category":[{"l":"International Equity","v":26.01},{"l":"InVITs","v":19.91},{"l":"Liquid","v":2.48},{"l":"Commodities","v":1.48},{"l":"Corporate Bonds","v":0.17},{"l":"Domestic Equity","v":0.11}],"instrument":[{"l":"China","v":35.08},{"l":"InVITs","v":19.91},{"l":"USA","v":16.81},{"l":"Direct Equity","v":16.27},{"l":"Mid Cap","v":4.43},{"l":"Gold","v":3.06},{"l":"Liquid","v":2.48},{"l":"Tactical","v":0.98},{"l":"Small Cap","v":0.42},{"l":"Corporate Bonds","v":0.17},{"l":"Flexi Cap","v":-0.03},{"l":"Silver","v":-0.1},{"l":"Large Cap","v":-1.66},{"l":"Factor","v":-1.95},{"l":"Emerging Market","v":-8.28}]}}};
+
+const tw = { cl:'asset_class', tl:'asset_class' };
+let tci = null;
+
+/* ─ TWRR GRAN ─ */
+function setGranTwrr(which, level, btn) {
+  if (which==='c') {
+    tw.cl = level;
+    document.querySelectorAll('#tgc .gt').forEach(b=>b.classList.remove('active'));
+  } else {
+    tw.tl = level;
+    document.querySelectorAll('#tgt .gt').forEach(b=>b.classList.remove('active'));
+  }
+  btn.classList.add('active');
+  renderTwrr();
+}
+
+/* ─ TWRR HELPERS ─ */
+function getTwrr(period, sid, level, label) {
+  const row = (T[period][sid][level]||[]).find(r=>r.l===label);
+  return row ? row.v : null;
+}
+function unionTwrr(period, level) {
+  const m = new Map();
+  ['9','10','11'].forEach(s => {
+    (T[period][s][level]||[]).forEach(r => { if (!m.has(r.l)) m.set(r.l, 0); m.set(r.l, m.get(r.l) + (r.v||0)); });
+  });
+  return [...m.entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+}
+function fmtT(v) {
+  if (v===null) return '&mdash;';
+  const s = v > 0.005 ? '+' : '';
+  return `${s}${v.toFixed(2)}%`;
+}
+
+/* ─ TWRR CHART ─ */
+function renderTwrrChart() {
+  const period = st.period;
+  const level  = tw.cl;
+  const labels = unionTwrr(period, level);
+  const h = Math.max(280, labels.length * (labels.length > 10 ? 34 : 48));
+  document.getElementById('tcw').style.height = h + 'px';
+
+  if (tci) tci.destroy();
+  tci = new Chart(document.getElementById('tcv').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label:'Moderate (9)',    data: labels.map(l=>getTwrr(period,'9',level,l)),  backgroundColor:'rgba(34,42,156,0.82)',  borderColor:'#222A9C', borderWidth:1.5, borderRadius:3, borderSkipped:false },
+        { label:'Aggressive (10)', data: labels.map(l=>getTwrr(period,'10',level,l)), backgroundColor:'rgba(245,168,0,0.82)',  borderColor:'#D49500', borderWidth:1.5, borderRadius:3, borderSkipped:false },
+        { label:'Equity (11)',     data: labels.map(l=>getTwrr(period,'11',level,l)), backgroundColor:'rgba(91,141,239,0.82)', borderColor:'#4A7FE0', borderWidth:1.5, borderRadius:3, borderSkipped:false },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins: {
+        legend: {
+          display:true, position:'top', align:'center',
+          labels:{ boxWidth:12, boxHeight:12, font:{family:"'Reddit Sans',sans-serif",size:12,weight:'600'}, color:'#374151', padding:16 }
+        },
+        tooltip: {
+          callbacks:{ label: c => { const v=c.raw; return v===null ? ` ${c.dataset.label}: —` : ` ${c.dataset.label}: ${v>=0?'+':''}${v.toFixed(2)}%`; } },
+          titleFont:{family:"'Reddit Sans',sans-serif"}, bodyFont:{family:"'Reddit Sans',sans-serif"},
+        }
+      },
+      scales: {
+        x: { grid:{color:'#EEF0F8'}, ticks:{font:{family:"'Reddit Sans',sans-serif",size:11},color:'#6B7280'}, border:{dash:[4,4],color:'#E2E6EF'} },
+        y: { grid:{color:'#EEF0F8'}, ticks:{callback:v=>v.toFixed(1)+'%',font:{family:"'Reddit Sans',sans-serif",size:11},color:'#6B7280'}, border:{dash:[4,4],color:'#E2E6EF'} }
+      }
+    }
+  });
+}
+
+/* ─ TWRR TABLE ─ */
+function renderTwrrTable() {
+  const period = st.period;
+  const level  = tw.tl;
+  const labels = unionTwrr(period, level);
+
+  document.getElementById('tth').innerHTML = `
+    <th class="lh">${LL[level]}</th>
+    <th class="mh">MODERATE (9)</th>
+    <th class="ah">AGGRESSIVE (10)</th>
+    <th class="eh">EQUITY (11)</th>`;
+
+  const rows = labels.map(label => {
+    const v9  = getTwrr(period,'9',level,label);
+    const v10 = getTwrr(period,'10',level,label);
+    const v11 = getTwrr(period,'11',level,label);
+    return `<tr><td class="lc">${label}</td><td class="${vc(v9)}">${fmtT(v9)}</td><td class="${vc(v10)}">${fmtT(v10)}</td><td class="${vc(v11)}">${fmtT(v11)}</td></tr>`;
+  });
+  document.getElementById('ttb').innerHTML = rows.join('');
+}
+
+function renderTwrr() { renderTwrrChart(); renderTwrrTable(); }
+
+/* ─ CLIENT PERFORMANCE DATA ────────────────────────────────── */
+const S3D = {
+  mar: {
+    label: "24 Mar 2026",
+    "9":  { gt4: 67.1, b24: 0.7,  b02: 14.5, bn01: 6.2, lt1: 11.5, avg: 12.96, feeRef: "Nifty 50 TRI-50%, Nifty Arbitrage Index-50%",  valid: 60,  na: 24, total: 84  },
+    "10": { gt4: 83.1, b24: 7.3,  b02: 8.7,  bn01: 0.9, lt1: 0.0,  avg: 9.68,  feeRef: "Nifty 50 TRI-80%, Nifty Arbitrage Index-20%",  valid: 116, na: 40, total: 156 },
+    "11": { gt4: 47.2, b24: 52.8, b02: 0.0,  bn01: 0.0, lt1: 0.0,  avg: 5.15,  feeRef: "Nifty 50 TRI",                                  valid: 37,  na: 10, total: 47  }
+  },
+  feb: {
+    label: "28 Feb 2026",
+    "9":  { gt4: 74.6, b24: 4.4,  b02: 21.0, bn01: 0.0, lt1: 0.0,  avg: 15.24, feeRef: "Nifty 50 TRI-50%, Nifty Arbitrage Index-50%",  valid: 50,  na: 19, total: 69  },
+    "10": { gt4: 86.9, b24: 3.4,  b02: 7.2,  bn01: 2.5, lt1: 0.0,  avg: 10.33, feeRef: "Nifty 50 TRI-80%, Nifty Arbitrage Index-20%",  valid: 100, na: 34, total: 134 },
+    "11": { gt4: 34.6, b24: 8.5,  b02: 56.9, bn01: 0.0, lt1: 0.0,  avg: 2.41,  feeRef: "Nifty 50 TRI",                                  valid: 35,  na: 9,  total: 44  }
+  }
+};
+
+
+let s3date = 'mar';
+let s3chart = null;
+
+function setS3Date(key, btn) {
+  s3date = key;
+  document.querySelectorAll('#s3-date-pills .pp').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderS3();
+}
+
+function fmtR(v) {
+  if (v===null || v===undefined) return '<span class="dsh">&mdash;</span>';
+  const cls = v > 0.005 ? 'pos' : v < -0.005 ? 'neg' : 'zer';
+  return '<span class="'+cls+'">'+(v>=0?'+':'')+v.toFixed(2)+'%</span>';
+}
+function fmtA(v) {
+  if (v===null || v===undefined) return '<span class="dsh">&mdash;</span>';
+  const cls = v > 0.01 ? 'pos' : v < -0.01 ? 'neg' : 'zer';
+  const bg = v > 0.01 ? 'rgba(22,163,74,0.07)' : v < -0.01 ? 'rgba(220,38,38,0.07)' : 'transparent';
+  const s = v >= 0 ? '+' : '';
+  return '<span class="'+cls+'" style="font-weight:700;background:'+bg+';padding:2px 5px;border-radius:3px">'+s+v.toFixed(2)+'%</span>';
+}
+
+function renderS3() {
+  const d = S3D[s3date];
+  const schemes = [
+    { id: '9',  name: 'Moderate (S9)',    shortName: 'Moderate' },
+    { id: '10', name: 'Aggressive (S10)', shortName: 'Aggressive' },
+    { id: '11', name: 'Equity (S11)',     shortName: 'Equity' }
+  ];
+
+  // ── Table ─────────────────────────────────────────────────────────────────
+  const fmtPct = function(v) {
+    if (v === 0) return '<span style="color:#94A3B8;">—</span>';
+    return v.toFixed(1) + '%';
+  };
+  const rows = schemes.map(function(s) {
+    const r = d[s.id];
+    const avgColor = r.avg >= 0 ? '#15803D' : '#B91C1C';
+    const avgBg = r.avg >= 0 ? 'rgba(22,163,74,0.06)' : 'rgba(220,38,38,0.06)';
+    return '<tr style="border-bottom:1px solid #F1F5F9">' +
+      '<td style="padding:10px;font-weight:600;color:var(--navy)">' + s.name + '</td>' +
+      '<td style="text-align:right;padding:10px;font-weight:700;color:#15803D;background:rgba(22,163,74,0.04)">' + fmtPct(r.gt4) + '</td>' +
+      '<td style="text-align:right;padding:10px;font-weight:600;color:#166534;background:rgba(74,222,128,0.04)">' + fmtPct(r.b24) + '</td>' +
+      '<td style="text-align:right;padding:10px;color:#854D0E;background:rgba(234,179,8,0.04)">' + fmtPct(r.b02) + '</td>' +
+      '<td style="text-align:right;padding:10px;color:#C2410C;background:rgba(249,115,22,0.04)">' + fmtPct(r.bn01) + '</td>' +
+      '<td style="text-align:right;padding:10px;color:#B91C1C;background:rgba(220,38,38,0.04)">' + fmtPct(r.lt1) + '</td>' +
+      '<td style="text-align:right;padding:10px;font-weight:700;color:' + avgColor + ';background:' + avgBg + '">' + (r.avg >= 0 ? '+' : '') + r.avg.toFixed(2) + '%</td>' +
+    '</tr>';
+  });
+  document.getElementById('s3-tbody').innerHTML = rows.join('');
+
+  // ── Exclusion note ────────────────────────────────────────────────────────
+  const totalNA = schemes.reduce(function(sum, s) { return sum + d[s.id].na; }, 0);
+  const excl = document.getElementById('s3-excl-note');
+  if (excl) excl.textContent = totalNA > 0 ? ('(' + totalNA + ' new clients excl. — no SI data yet)') : '';
+
+  // ── Fee reference note ────────────────────────────────────────────────────
+  const noteEl = document.getElementById('s3-feeref-note');
+  if (noteEl) {
+    const notes = schemes.map(function(s) {
+      const r = d[s.id];
+      return '<strong>' + s.name + ':</strong> ' + r.feeRef + ' <span style="color:#94A3B8">(' + r.valid + '/' + r.total + ' clients with SI data)</span>';
+    });
+    noteEl.innerHTML = '<strong>Fee Reference Index</strong> — ' + notes.join(' &nbsp;&bull;&nbsp; ');
+  }
+
+  // ── Chart ─────────────────────────────────────────────────────────────────
+  const labels = schemes.map(function(s) { return s.shortName; });
+  const bucketDefs = [
+    { key: 'gt4',  label: 'Alpha >4%',        color: 'rgba(22,163,74,0.88)' },
+    { key: 'b24',  label: 'Alpha 2–4%',  color: 'rgba(74,222,128,0.88)' },
+    { key: 'b02',  label: 'Alpha 0–2%',  color: 'rgba(234,179,8,0.88)' },
+    { key: 'bn01', label: 'Alpha 0 to −1%', color: 'rgba(249,115,22,0.88)' },
+    { key: 'lt1',  label: 'Alpha <−1%',  color: 'rgba(220,38,38,0.88)' }
+  ];
+  const datasets = bucketDefs.map(function(b) {
+    return {
+      label: b.label,
+      data: schemes.map(function(s) { return d[s.id][b.key]; }),
+      backgroundColor: b.color,
+      borderWidth: 0,
+      borderRadius: 2
+    };
+  });
+
+  if (s3chart) { s3chart.destroy(); s3chart = null; }
+  const ctx = document.getElementById('s3-canvas');
+  if (!ctx) return;
+  s3chart = new Chart(ctx.getContext('2d'), {
+    type: 'bar',
+    data: { labels: labels, datasets: datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { boxWidth: 12, padding: 14, font: { size: 11 } }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              return ' ' + ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '% of AUM';
+            }
+          }
+        },
+        title: {
+          display: true,
+          text: 'AUM Distribution by Alpha Bucket — As of ' + d.label,
+          font: { size: 12, weight: '600' },
+          color: '#374151',
+          padding: { bottom: 6 }
+        }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          grid: { display: false },
+          ticks: { font: { size: 12, weight: '600' } }
+        },
+        y: {
+          stacked: true,
+          min: 0,
+          max: 100,
+          ticks: {
+            callback: function(v) { return v + '%'; },
+            stepSize: 20,
+            font: { size: 11 }
+          },
+          title: { display: true, text: '% of AUM', font: { size: 11 }, color: '#6B7280' },
+          grid: { color: 'rgba(0,0,0,0.05)' }
+        }
+      }
+    }
+  });
+}
+
+</script>
+</body>
+</html>
