@@ -228,7 +228,7 @@ footer {
       <button class="pp"        onclick="setPeriod('SI',this)">Since Inception</button>
     </div>
   </div>
-  <div class="period-date" id="pd">Period: <strong>01/04/2026 to 27/04/2026</strong></div>
+  <div class="period-date" id="pd">Period: <strong>01/05/2026 to 12/05/2026</strong></div>
   <div class="scheme-legend">
     <div class="leg"><div class="leg-dot" style="background:var(--mod)"></div>Moderate (9)</div>
     <div class="leg"><div class="leg-dot" style="background:var(--agg)"></div>Aggressive (10)</div>
@@ -310,8 +310,8 @@ footer {
       <div style="padding:10px 20px 0;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--lite);padding-bottom:10px;">
         <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--sub)">As of:</span>
         <div id="s3-date-pills" class="period-pills" style="background:var(--bg);">
-          <button class="pp active" style="font-size:11px;padding:4px 12px;" onclick="setS3Date('apr',this)">27 Apr 2026</button>
-          <button class="pp"        style="font-size:11px;padding:4px 12px;" onclick="setS3Date('mar',this)">31 Mar 2026</button>
+          <button class="pp active" style="font-size:11px;padding:4px 12px;" onclick="setS3Date('may',this)">11 May 2026</button>
+          <button class="pp"        style="font-size:11px;padding:4px 12px;" onclick="setS3Date('apr',this)">30 Apr 2026</button>
         </div>
         <span id="s3-excl-note" style="font-size:11px;color:var(--sub);margin-left:4px;"></span>
       </div>
@@ -352,9 +352,10 @@ footer {
 
 <script>
 /* ─ DATA ───────────────────────────────────────────────────── */
-const D = {"MTD": {"9": {"asset_class": [{"l": "Equity", "v": 5.52}, {"l": "Alternates", "v": 1.13}, {"l": "Fixed Income", "v": 0.15}, {"l": "Liquid", "v": 0.03}], "category": [{"l": "Domestic Equity", "v": 4.1}, {"l": "International Equity", "v": 1.42}, {"l": "Commodities", "v": 0.65}, {"l": "InVITs", "v": 0.48}, {"l": "ESS", "v": 0.1}, {"l": "Corporate Bonds", "v": 0.05}, {"l": "Liquid", "v": 0.03}], "instrument": [{"l": "Direct Equity", "v": 1.36}, {"l": "Factor", "v": 0.92}, {"l": "USA", "v": 0.82}, {"l": "Flexi Cap", "v": 0.77}, {"l": "Tactical", "v": 0.68}, {"l": "InVITs", "v": 0.48}, {"l": "Gold", "v": 0.42}, {"l": "China", "v": 0.4}, {"l": "Silver", "v": 0.23}, {"l": "Emerging Market", "v": 0.2}, {"l": "Mid Cap", "v": 0.18}, {"l": "Small Cap", "v": 0.13}, {"l": "ESS", "v": 0.1}, {"l": "Large Cap", "v": 0.06}, {"l": "Corporate Bonds", "v": 0.05}, {"l": "Liquid", "v": 0.03}]}, "10": {"asset_class": [{"l": "Equity", "v": 9.23}, {"l": "Alternates", "v": 0.6}, {"l": "Fixed Income", "v": 0.03}, {"l": "Liquid", "v": 0.02}], "category": [{"l": "Domestic Equity", "v": 6.85}, {"l": "International Equity", "v": 2.38}, {"l": "Commodities", "v": 0.34}, {"l": "InVITs", "v": 0.26}, {"l": "ESS", "v": 0.02}, {"l": "Liquid", "v": 0.02}, {"l": "Corporate Bonds", "v": 0.01}], "instrument": [{"l": "Direct Equity", "v": 2.33}, {"l": "Tactical", "v": 1.45}, {"l": "USA", "v": 1.38}, {"l": "Factor", "v": 1.29}, {"l": "Flexi Cap", "v": 1.23}, {"l": "China", "v": 0.81}, {"l": "Small Cap", "v": 0.36}, {"l": "InVITs", "v": 0.26}, {"l": "Gold", "v": 0.2}, {"l": "Mid Cap", "v": 0.19}, {"l": "Emerging Market", "v": 0.19}, {"l": "Silver", "v": 0.14}, {"l": "ESS", "v": 0.02}, {"l": "Liquid", "v": 0.02}, {"l": "Corporate Bonds", "v": 0.01}, {"l": "Large Cap", "v": 0.0}]}, "11": {"asset_class": [{"l": "Equity", "v": 11.12}, {"l": "Fixed Income", "v": 0.0}, {"l": "Alternates", "v": 0.0}, {"l": "Liquid", "v": 0.0}], "category": [{"l": "Domestic Equity", "v": 7.95}, {"l": "International Equity", "v": 3.17}, {"l": "Corporate Bonds", "v": 0.0}, {"l": "Commodities", "v": 0.0}, {"l": "Liquid", "v": 0.0}], "instrument": [{"l": "Flexi Cap", "v": 2.47}, {"l": "Tactical", "v": 2.0}, {"l": "USA", "v": 1.7}, {"l": "Mid Cap", "v": 1.66}, {"l": "Factor", "v": 1.54}, {"l": "China", "v": 1.46}, {"l": "Small Cap", "v": 0.27}, {"l": "Large Cap", "v": 0.01}, {"l": "Emerging Market", "v": 0.01}, {"l": "Corporate Bonds", "v": 0.0}, {"l": "Silver", "v": 0.0}, {"l": "Liquid", "v": 0.0}]}}, "1M": {"9": {"asset_class": [{"l": "Liquid", "v": 0.01}, {"l": "Fixed Income", "v": -0.07}, {"l": "Alternates", "v": -1.84}, {"l": "Equity", "v": -4.5}], "category": [{"l": "Corporate Bonds", "v": 0.04}, {"l": "Liquid", "v": 0.01}, {"l": "InVITs", "v": -0.07}, {"l": "ESS", "v": -0.11}, {"l": "International Equity", "v": -0.45}, {"l": "Commodities", "v": -1.77}, {"l": "Domestic Equity", "v": -4.05}], "instrument": [{"l": "Corporate Bonds", "v": 0.04}, {"l": "Liquid", "v": 0.01}, {"l": "Emerging Market", "v": -0.05}, {"l": "InVITs", "v": -0.07}, {"l": "Small Cap", "v": -0.1}, {"l": "Large Cap", "v": -0.1}, {"l": "ESS", "v": -0.11}, {"l": "Mid Cap", "v": -0.13}, {"l": "China", "v": -0.16}, {"l": "USA", "v": -0.24}, {"l": "Tactical", "v": -0.47}, {"l": "Silver", "v": -0.51}, {"l": "Flexi Cap", "v": -0.89}, {"l": "Direct Equity", "v": -1.1}, {"l": "Factor", "v": -1.26}, {"l": "Gold", "v": -1.26}]}, "10": {"asset_class": [{"l": "Liquid", "v": 0.01}, {"l": "Fixed Income", "v": -0.02}, {"l": "Alternates", "v": -0.99}, {"l": "Equity", "v": -7.13}], "category": [{"l": "Liquid", "v": 0.01}, {"l": "Corporate Bonds", "v": 0.0}, {"l": "ESS", "v": -0.02}, {"l": "InVITs", "v": -0.05}, {"l": "International Equity", "v": -0.67}, {"l": "Commodities", "v": -0.94}, {"l": "Domestic Equity", "v": -6.46}], "instrument": [{"l": "Liquid", "v": 0.01}, {"l": "Corporate Bonds", "v": 0.0}, {"l": "ESS", "v": -0.02}, {"l": "Emerging Market", "v": -0.03}, {"l": "InVITs", "v": -0.05}, {"l": "Mid Cap", "v": -0.16}, {"l": "Small Cap", "v": -0.26}, {"l": "USA", "v": -0.3}, {"l": "Silver", "v": -0.32}, {"l": "China", "v": -0.34}, {"l": "Gold", "v": -0.62}, {"l": "Tactical", "v": -1.0}, {"l": "Flexi Cap", "v": -1.45}, {"l": "Factor", "v": -1.75}, {"l": "Direct Equity", "v": -1.84}]}, "11": {"asset_class": [{"l": "Alternates", "v": 0.0}, {"l": "Fixed Income", "v": -0.02}, {"l": "Liquid", "v": -0.06}, {"l": "Equity", "v": -8.53}], "category": [{"l": "Commodities", "v": 0.0}, {"l": "Corporate Bonds", "v": -0.02}, {"l": "Liquid", "v": -0.06}, {"l": "International Equity", "v": -0.87}, {"l": "Domestic Equity", "v": -7.66}], "instrument": [{"l": "Large Cap", "v": 0.0}, {"l": "Direct Equity", "v": 0.0}, {"l": "Silver", "v": 0.0}, {"l": "Gold", "v": 0.0}, {"l": "Emerging Market", "v": -0.01}, {"l": "Corporate Bonds", "v": -0.02}, {"l": "Liquid", "v": -0.06}, {"l": "Small Cap", "v": -0.17}, {"l": "USA", "v": -0.29}, {"l": "China", "v": -0.57}, {"l": "Mid Cap", "v": -1.3}, {"l": "Tactical", "v": -1.33}, {"l": "Factor", "v": -2.02}, {"l": "Flexi Cap", "v": -2.84}]}}, "SI": {"9": {"asset_class": [{"l": "Alternates", "v": 18.52}, {"l": "Fixed Income", "v": 1.93}, {"l": "Equity", "v": 0.44}, {"l": "Liquid", "v": 0.42}], "category": [{"l": "Commodities", "v": 17.46}, {"l": "Corporate Bonds", "v": 2.05}, {"l": "International Equity", "v": 1.97}, {"l": "InVITs", "v": 1.06}, {"l": "Liquid", "v": 0.42}, {"l": "ESS", "v": -0.12}, {"l": "Domestic Equity", "v": -1.53}], "instrument": [{"l": "Silver", "v": 12.68}, {"l": "Gold", "v": 4.78}, {"l": "Corporate Bonds", "v": 2.05}, {"l": "China", "v": 1.54}, {"l": "InVITs", "v": 1.06}, {"l": "USA", "v": 0.48}, {"l": "Liquid", "v": 0.42}, {"l": "Large Cap", "v": 0.0}, {"l": "Emerging Market", "v": -0.05}, {"l": "ESS", "v": -0.12}, {"l": "Flexi Cap", "v": -0.13}, {"l": "Mid Cap", "v": -0.13}, {"l": "Small Cap", "v": -0.15}, {"l": "Direct Equity", "v": -0.21}, {"l": "Tactical", "v": -0.21}, {"l": "Factor", "v": -0.7}]}, "10": {"asset_class": [{"l": "Alternates", "v": 8.93}, {"l": "Equity", "v": 2.32}, {"l": "Fixed Income", "v": 0.41}, {"l": "Liquid", "v": 0.39}], "category": [{"l": "Commodities", "v": 8.14}, {"l": "International Equity", "v": 2.38}, {"l": "InVITs", "v": 0.79}, {"l": "Corporate Bonds", "v": 0.43}, {"l": "Liquid", "v": 0.39}, {"l": "ESS", "v": -0.02}, {"l": "Domestic Equity", "v": -0.06}], "instrument": [{"l": "Silver", "v": 5.38}, {"l": "Gold", "v": 2.76}, {"l": "China", "v": 2.17}, {"l": "InVITs", "v": 0.79}, {"l": "Direct Equity", "v": 0.46}, {"l": "Corporate Bonds", "v": 0.43}, {"l": "Flexi Cap", "v": 0.42}, {"l": "Liquid", "v": 0.39}, {"l": "Large Cap", "v": 0.27}, {"l": "USA", "v": 0.24}, {"l": "ESS", "v": -0.02}, {"l": "Emerging Market", "v": -0.03}, {"l": "Mid Cap", "v": -0.13}, {"l": "Small Cap", "v": -0.31}, {"l": "Factor", "v": -0.34}, {"l": "Tactical", "v": -0.43}]}, "11": {"asset_class": [{"l": "Liquid", "v": 0.68}, {"l": "Equity", "v": 0.42}, {"l": "Alternates", "v": 0.06}, {"l": "Fixed Income", "v": -0.02}], "category": [{"l": "International Equity", "v": 2.58}, {"l": "Liquid", "v": 0.68}, {"l": "Commodities", "v": 0.09}, {"l": "Corporate Bonds", "v": -0.02}, {"l": "InVITs", "v": -0.03}, {"l": "Domestic Equity", "v": -2.16}], "instrument": [{"l": "China", "v": 2.22}, {"l": "Liquid", "v": 0.68}, {"l": "USA", "v": 0.37}, {"l": "Large Cap", "v": 0.27}, {"l": "Gold", "v": 0.14}, {"l": "Direct Equity", "v": 0.02}, {"l": "Emerging Market", "v": -0.01}, {"l": "Corporate Bonds", "v": -0.02}, {"l": "InVITs", "v": -0.03}, {"l": "Silver", "v": -0.05}, {"l": "Mid Cap", "v": -0.16}, {"l": "Small Cap", "v": -0.18}, {"l": "Tactical", "v": -0.5}, {"l": "Factor", "v": -0.59}, {"l": "Flexi Cap", "v": -1.02}]}}};
+const D = {"MTD":{"9":{"asset_class":[{"l":"Equity","v":0.8},{"l":"Alternates","v":0.16},{"l":"Fixed Income","v":0.02},{"l":"Liquid","v":0.0}],"category":[{"l":"International Equity","v":0.62},{"l":"Domestic Equity","v":0.18},{"l":"Commodities","v":0.15},{"l":"ESS","v":0.01},{"l":"Corporate Bonds","v":0.01},{"l":"InVITs","v":0.01},{"l":"Liquid","v":0.0}],"instrument":[{"l":"USA","v":0.25},{"l":"China","v":0.22},{"l":"Silver","v":0.2},{"l":"Emerging Market","v":0.15},{"l":"Direct Equity","v":0.14},{"l":"Factor","v":-0.12},{"l":"Tactical","v":0.09},{"l":"Gold","v":-0.05},{"l":"Mid Cap","v":0.03},{"l":"Flexi Cap","v":0.03},{"l":"Small Cap","v":0.03},{"l":"Large Cap","v":-0.02},{"l":"ESS","v":0.01},{"l":"Corporate Bonds","v":0.01},{"l":"InVITs","v":0.01},{"l":"Liquid","v":0.0}]},"10":{"asset_class":[{"l":"Equity","v":1.29},{"l":"Alternates","v":0.07},{"l":"Fixed Income","v":0.0},{"l":"Liquid","v":0.0}],"category":[{"l":"International Equity","v":0.99},{"l":"Domestic Equity","v":0.3},{"l":"Commodities","v":0.09},{"l":"ESS","v":0.0},{"l":"Corporate Bonds","v":0.0},{"l":"Liquid","v":0.0},{"l":"InVITs","v":-0.02}],"instrument":[{"l":"China","v":0.44},{"l":"USA","v":0.4},{"l":"Direct Equity","v":0.2},{"l":"Tactical","v":0.17},{"l":"Factor","v":-0.16},{"l":"Emerging Market","v":0.15},{"l":"Silver","v":0.12},{"l":"Small Cap","v":0.08},{"l":"Mid Cap","v":0.03},{"l":"Gold","v":-0.03},{"l":"InVITs","v":-0.02},{"l":"Large Cap","v":-0.01},{"l":"Flexi Cap","v":-0.01},{"l":"ESS","v":0.0},{"l":"Corporate Bonds","v":0.0},{"l":"Liquid","v":0.0}]},"11":{"asset_class":[{"l":"Equity","v":1.66},{"l":"Fixed Income","v":0.0},{"l":"Liquid","v":0.0}],"category":[{"l":"International Equity","v":1.29},{"l":"Domestic Equity","v":0.37},{"l":"Corporate Bonds","v":0.0},{"l":"Liquid","v":0.0}],"instrument":[{"l":"China","v":0.84},{"l":"USA","v":0.44},{"l":"Mid Cap","v":0.28},{"l":"Tactical","v":0.27},{"l":"Factor","v":-0.15},{"l":"Flexi Cap","v":-0.08},{"l":"Small Cap","v":0.05},{"l":"Emerging Market","v":0.01},{"l":"Large Cap","v":0.0},{"l":"Corporate Bonds","v":0.0},{"l":"Liquid","v":0.0}]}},"1M":{"9":{"asset_class":[{"l":"Equity","v":5.47},{"l":"Alternates","v":0.68},{"l":"Fixed Income","v":0.16},{"l":"Liquid","v":0.03}],"category":[{"l":"Domestic Equity","v":4.08},{"l":"International Equity","v":1.39},{"l":"InVITs","v":0.44},{"l":"Commodities","v":0.24},{"l":"ESS","v":0.11},{"l":"Corporate Bonds","v":0.05},{"l":"Liquid","v":0.03}],"instrument":[{"l":"Direct Equity","v":1.3},{"l":"Factor","v":0.9},{"l":"Flexi Cap","v":0.78},{"l":"Tactical","v":0.73},{"l":"USA","v":0.73},{"l":"China","v":0.44},{"l":"InVITs","v":0.44},{"l":"Emerging Market","v":0.22},{"l":"Mid Cap","v":0.18},{"l":"Silver","v":0.14},{"l":"Small Cap","v":0.12},{"l":"ESS","v":0.11},{"l":"Gold","v":0.1},{"l":"Large Cap","v":0.07},{"l":"Corporate Bonds","v":0.05},{"l":"Liquid","v":0.03}]},"10":{"asset_class":[{"l":"Equity","v":8.69},{"l":"Alternates","v":0.63},{"l":"Fixed Income","v":0.03},{"l":"Liquid","v":0.02}],"category":[{"l":"Domestic Equity","v":6.08},{"l":"International Equity","v":2.61},{"l":"Commodities","v":0.36},{"l":"InVITs","v":0.27},{"l":"ESS","v":0.02},{"l":"Liquid","v":0.02},{"l":"Corporate Bonds","v":0.01}],"instrument":[{"l":"Direct Equity","v":2.14},{"l":"USA","v":1.44},{"l":"Tactical","v":1.31},{"l":"Factor","v":1.1},{"l":"Flexi Cap","v":1.06},{"l":"China","v":0.96},{"l":"Small Cap","v":0.31},{"l":"InVITs","v":0.27},{"l":"Gold","v":0.23},{"l":"Emerging Market","v":0.21},{"l":"Mid Cap","v":0.17},{"l":"Silver","v":0.13},{"l":"ESS","v":0.02},{"l":"Liquid","v":0.02},{"l":"Corporate Bonds","v":0.01},{"l":"Large Cap","v":-0.01}]},"11":{"asset_class":[{"l":"Equity","v":10.76},{"l":"Fixed Income","v":0.0},{"l":"Alternates","v":0.0},{"l":"Liquid","v":0.0}],"category":[{"l":"Domestic Equity","v":7.34},{"l":"International Equity","v":3.42},{"l":"Corporate Bonds","v":0.0},{"l":"Commodities","v":0.0},{"l":"Liquid","v":0.0}],"instrument":[{"l":"Flexi Cap","v":2.29},{"l":"Tactical","v":1.9},{"l":"China","v":1.71},{"l":"USA","v":1.69},{"l":"Mid Cap","v":1.52},{"l":"Factor","v":1.37},{"l":"Small Cap","v":0.25},{"l":"Emerging Market","v":0.02},{"l":"Large Cap","v":0.01},{"l":"Corporate Bonds","v":0.0},{"l":"Silver","v":0.0},{"l":"Liquid","v":0.0}]}},"SI":{"9":{"asset_class":[{"l":"Alternates","v":20.38},{"l":"Equity","v":5.94},{"l":"Fixed Income","v":2.26},{"l":"Liquid","v":0.46}],"category":[{"l":"Commodities","v":18.81},{"l":"International Equity","v":3.47},{"l":"Domestic Equity","v":2.47},{"l":"Corporate Bonds","v":2.28},{"l":"InVITs","v":1.57},{"l":"Liquid","v":0.46},{"l":"ESS","v":-0.02}],"instrument":[{"l":"Silver","v":13.62},{"l":"Gold","v":5.19},{"l":"Corporate Bonds","v":2.28},{"l":"China","v":2.08},{"l":"InVITs","v":1.57},{"l":"USA","v":1.23},{"l":"Direct Equity","v":1.09},{"l":"Flexi Cap","v":0.64},{"l":"Tactical","v":0.51},{"l":"Liquid","v":0.46},{"l":"Factor","v":0.16},{"l":"Emerging Market","v":0.16},{"l":"Large Cap","v":0.07},{"l":"Mid Cap","v":0.04},{"l":"Small Cap","v":-0.04},{"l":"ESS","v":-0.02}]},"10":{"asset_class":[{"l":"Equity","v":11.22},{"l":"Alternates","v":10.39},{"l":"Fixed Income","v":0.47},{"l":"Liquid","v":0.45}],"category":[{"l":"Commodities","v":9.26},{"l":"Domestic Equity","v":6.01},{"l":"International Equity","v":5.21},{"l":"InVITs","v":1.13},{"l":"Corporate Bonds","v":0.48},{"l":"Liquid","v":0.45},{"l":"ESS","v":-0.01}],"instrument":[{"l":"Silver","v":6.02},{"l":"China","v":3.33},{"l":"Gold","v":3.24},{"l":"Direct Equity","v":2.64},{"l":"USA","v":1.7},{"l":"Flexi Cap","v":1.51},{"l":"InVITs","v":1.13},{"l":"Tactical","v":0.84},{"l":"Factor","v":0.73},{"l":"Corporate Bonds","v":0.48},{"l":"Liquid","v":0.45},{"l":"Large Cap","v":0.29},{"l":"Emerging Market","v":0.18},{"l":"Mid Cap","v":0.03},{"l":"Small Cap","v":-0.03},{"l":"ESS","v":-0.01}]},"11":{"asset_class":[{"l":"Equity","v":11.25},{"l":"Liquid","v":0.76},{"l":"Alternates","v":0.08},{"l":"Fixed Income","v":-0.01}],"category":[{"l":"International Equity","v":6.3},{"l":"Domestic Equity","v":4.95},{"l":"Liquid","v":0.76},{"l":"Commodities","v":0.11},{"l":"Corporate Bonds","v":-0.01},{"l":"InVITs","v":-0.03}],"instrument":[{"l":"China","v":4.18},{"l":"USA","v":2.11},{"l":"Mid Cap","v":1.34},{"l":"Tactical","v":1.33},{"l":"Flexi Cap","v":1.17},{"l":"Liquid","v":0.76},{"l":"Factor","v":0.73},{"l":"Large Cap","v":0.31},{"l":"Gold","v":0.16},{"l":"Silver","v":-0.05},{"l":"Small Cap","v":0.04},{"l":"Direct Equity","v":0.03},{"l":"InVITs","v":-0.03},{"l":"Emerging Market","v":0.01},{"l":"Corporate Bonds","v":-0.01}]}}};
 
-const PD = { MTD:'01/04/2026 to 27/04/2026', '1M':'01/03/2026 to 31/03/2026', SI:'21/03/2025 to 31/03/2026' };
+const PD = {"MTD": "01/05/2026 to 12/05/2026", "1M": "01/04/2026 to 30/04/2026", "SI": "21/04/2024 to 30/04/2026"};
+const PD_BY_SCHEME = {"MTD":{"9":"01/05/2026 to 12/05/2026","10":"01/05/2026 to 12/05/2026","11":"01/05/2026 to 12/05/2026"},"1M":{"9":"01/04/2026 to 30/04/2026","10":"01/04/2026 to 30/04/2026","11":"01/04/2026 to 30/04/2026"},"SI":{"9":"17/04/2025 to 30/04/2026","10":"24/03/2025 to 30/04/2026","11":"21/04/2024 to 30/04/2026"}};
 const LL = { asset_class:'Asset Class', category:'Category', instrument:'Instrument' };
 const st = { period:'MTD', cl:'asset_class', tl:'asset_class' };
 let ci = null;
@@ -373,7 +374,12 @@ function setPeriod(p, btn) {
   st.period = p;
   document.querySelectorAll('.period-pills .pp').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('pd').innerHTML = `Period: <strong>${PD[p]}</strong>`;
+  let note = '';
+  if (p === 'SI') {
+    const ps = PD_BY_SCHEME.SI;
+    note = ` <span style="color:#94A3B8;font-size:10.5px;margin-left:6px">(Mod ${ps['9'].split(' ')[0]} | Agg ${ps['10'].split(' ')[0]} | Eqt ${ps['11'].split(' ')[0]} → 30/04/2026)</span>`;
+  }
+  document.getElementById('pd').innerHTML = `Period: <strong>${PD[p]}</strong>${note}`;
   render();
 }
 
@@ -558,22 +564,88 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /* ─ CLIENT PERFORMANCE DATA ────────────────────────────────── */
 const S3D = {
-  apr: {
-    label: "27 Apr 2026",
-    "9": { gt4: 44.4, b24: 33.2, b02: 19.2, bn01: 3.2, lt1: 0.0, avg: 7.21, feeRef: "Nifty 50 TRI-50%, Nifty Arbitrage Index-50%", valid: 70, na: 0, total: 70 },
-    "10": { gt4: 86.5, b24: 3.7, b02: 3.6, bn01: 3.6, lt1: 2.6, avg: 9.6, feeRef: "Nifty 50 TRI-80%, Nifty Arbitrage Index-20%", valid: 139, na: 0, total: 139 },
-    "11": { gt4: 99.0, b24: 0.0, b02: 1.0, bn01: 0.0, lt1: 0.0, avg: 9.74, feeRef: "Nifty 50 TRI", valid: 36, na: 0, total: 36 }
+  "apr": {
+    "label": "30 Apr 2026",
+    "9": {
+      "gt4": 70.7,
+      "b24": 13.6,
+      "b02": 12.9,
+      "bn01": 2.2,
+      "lt1": 0.5,
+      "avg": 14.73,
+      "feeRef": "Nifty 50 TRI-50%, Nifty Arbitrage Index-50%",
+      "valid": 73,
+      "na": 0,
+      "total": 73
+    },
+    "10": {
+      "gt4": 91.0,
+      "b24": 2.3,
+      "b02": 3.7,
+      "bn01": 1.6,
+      "lt1": 1.4,
+      "avg": 12.47,
+      "feeRef": "Nifty 50 TRI-80%, Nifty Arbitrage Index-20%",
+      "valid": 146,
+      "na": 0,
+      "total": 146
+    },
+    "11": {
+      "gt4": 99.5,
+      "b24": 0,
+      "b02": 0.5,
+      "bn01": 0,
+      "lt1": 0,
+      "avg": 8.16,
+      "feeRef": "Nifty 50 TRI",
+      "valid": 37,
+      "na": 0,
+      "total": 37
+    }
   },
-  mar: {
-    label: "31 Mar 2026",
-    "9": { gt4: 32.4, b24: 11.7, b02: 23.1, bn01: 15.4, lt1: 17.4, avg: 5.09, feeRef: "Nifty 50 TRI-50%, Nifty Arbitrage Index-50%", valid: 60, na: 0, total: 60 },
-    "10": { gt4: 64.4, b24: 15.3, b02: 18.8, bn01: 1.0, lt1: 0.5, avg: 6.48, feeRef: "Nifty 50 TRI-80%, Nifty Arbitrage Index-20%", valid: 122, na: 0, total: 122 },
-    "11": { gt4: 94.4, b24: 5.6, b02: 0.0, bn01: 0.0, lt1: 0.0, avg: 6.23, feeRef: "Nifty 50 TRI", valid: 36, na: 0, total: 36 }
+  "may": {
+    "label": "11 May 2026",
+    "9": {
+      "gt4": 79.5,
+      "b24": 11.0,
+      "b02": 9.0,
+      "bn01": 0.5,
+      "lt1": 0,
+      "avg": 15.65,
+      "feeRef": "Nifty 50 TRI-50%, Nifty Arbitrage Index-50%",
+      "valid": 75,
+      "na": 0,
+      "total": 75
+    },
+    "10": {
+      "gt4": 92.9,
+      "b24": 2.5,
+      "b02": 4.0,
+      "bn01": 0.5,
+      "lt1": 0,
+      "avg": 14.09,
+      "feeRef": "Nifty 50 TRI-80%, Nifty Arbitrage Index-20%",
+      "valid": 151,
+      "na": 0,
+      "total": 151
+    },
+    "11": {
+      "gt4": 100.0,
+      "b24": 0,
+      "b02": 0,
+      "bn01": 0,
+      "lt1": 0,
+      "avg": 10.39,
+      "feeRef": "Nifty 50 TRI",
+      "valid": 37,
+      "na": 0,
+      "total": 37
+    }
   }
 };
 
 
-let s3date = 'apr';
+let s3date = 'may';
 let s3chart = null;
 
 function setS3Date(key, btn) {
