@@ -604,11 +604,10 @@ function renderS3() {
     if (v === 0) return '<span style="color:#94A3B8;">—</span>';
     return v.toFixed(1) + '%';
   };
-  const fmtAlpha = function(v, name) {
+  const fmtAlpha = function(v) {
     if (v === null || v === undefined) return '<span style="color:#94A3B8;">&mdash;</span>';
     const sign = v >= 0 ? '+' : '';
-    const namePart = name ? '<div style="font-size:10px;color:var(--sub);font-weight:500;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;">' + name + '</div>' : '';
-    return '<div style="font-weight:700;">' + sign + v.toFixed(2) + '%</div>' + namePart;
+    return '<span style="font-weight:700;">' + sign + v.toFixed(2) + '%</span>';
   };
   const rows = schemes.map(function(s) {
     const r = d[s.id];
@@ -624,8 +623,8 @@ function renderS3() {
       '<td style="text-align:right;padding:10px;color:#C2410C;background:rgba(249,115,22,0.04)">' + fmtPct(r.bn01) + '</td>' +
       '<td style="text-align:right;padding:10px;color:#B91C1C;background:rgba(220,38,38,0.04)">' + fmtPct(r.lt1) + '</td>' +
       '<td style="text-align:right;padding:10px;font-weight:700;color:' + avgColor + ';background:' + avgBg + '">' + (r.avg >= 0 ? '+' : '') + r.avg.toFixed(2) + '%</td>' +
-      '<td style="text-align:right;padding:10px;color:' + maxColor + ';background:rgba(5,150,105,0.05)">' + fmtAlpha(r.maxAlpha, r.maxName) + '</td>' +
-      '<td style="text-align:right;padding:10px;color:' + minColor + ';background:rgba(185,28,28,0.04)">' + fmtAlpha(r.minAlpha, r.minName) + '</td>' +
+      '<td style="text-align:right;padding:10px;color:' + maxColor + ';background:rgba(5,150,105,0.05)">' + fmtAlpha(r.maxAlpha) + '</td>' +
+      '<td style="text-align:right;padding:10px;color:' + minColor + ';background:rgba(185,28,28,0.04)">' + fmtAlpha(r.minAlpha) + '</td>' +
     '</tr>';
   });
   document.getElementById('s3-tbody').innerHTML = rows.join('');
