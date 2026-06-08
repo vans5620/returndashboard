@@ -240,6 +240,7 @@ footer {
 <nav class="snav">
   <button class="st active" onclick="showSec('s1',this)">% Contribution <span class="sb">S1</span></button>
   <button class="st"        onclick="showSec('s3',this)">Client Outperformance <span class="sb">S2</span></button>
+  <button class="st"        onclick="showSec('s4',this)">Performance Distribution <span class="sb">S3</span></button>
 </nav>
 
 <main>
@@ -349,6 +350,91 @@ footer {
 
   </div>
 
+  <!-- ── S4: PERFORMANCE DISTRIBUTION ── -->
+  <div id="s4" class="sp">
+
+    <!-- Methodology note -->
+    <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:10px 16px;font-size:12px;color:#1E40AF;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <strong>Distribution view</strong>&nbsp;&mdash; how all client accounts spread across <strong>alpha</strong> and <strong>since-inception return</strong> buckets, as <strong>% of clients</strong>.
+      Alpha = client SI return &minus; that scheme's fee-reference index return. Source: Client-wise Portfolio Performance &bull; Daily-valuation TWRR &bull; absolute (non-annualised) &bull; as on 31 May 2026.
+    </div>
+
+    <!-- Controls -->
+    <div class="card" style="overflow:visible">
+      <div class="card-head" style="padding-bottom:0">
+        <div class="card-head-l">
+          <span class="sec-badge">Section 3</span>
+          <span class="card-title">Client Performance Distribution <span style="font-size:12px;font-weight:400;color:var(--sub)">(292 accounts)</span></span>
+        </div>
+        <div class="card-note" id="s4-note"></div>
+      </div>
+      <div style="padding:14px 20px 16px;display:flex;flex-wrap:wrap;gap:18px 26px;align-items:flex-end;border-bottom:1px solid var(--lite);">
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <span style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--sub)">Scheme</span>
+          <div id="s4-scheme" class="period-pills" style="background:var(--bg);">
+            <button class="pp active" style="font-size:11.5px;padding:5px 12px" onclick="s4SetScheme('All',this)">All</button>
+            <button class="pp" style="font-size:11.5px;padding:5px 12px" onclick="s4SetScheme('9',this)">Moderate</button>
+            <button class="pp" style="font-size:11.5px;padding:5px 12px" onclick="s4SetScheme('10',this)">Aggressive</button>
+            <button class="pp" style="font-size:11.5px;padding:5px 12px" onclick="s4SetScheme('11',this)">Equity</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <span style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--sub)">Track record</span>
+          <div id="s4-track" class="period-pills" style="background:var(--bg);">
+            <button class="pp active" style="font-size:11.5px;padding:5px 12px" onclick="s4SetTrack('all',this)">All</button>
+            <button class="pp" style="font-size:11.5px;padding:5px 12px" onclick="s4SetTrack('3m',this)">&ge;3M</button>
+            <button class="pp" style="font-size:11.5px;padding:5px 12px" onclick="s4SetTrack('6m',this)">&ge;6M</button>
+            <button class="pp" style="font-size:11.5px;padding:5px 12px" onclick="s4SetTrack('1y',this)">&ge;1Y</button>
+          </div>
+        </div>
+        <details style="margin-left:auto;">
+          <summary style="cursor:pointer;font-size:12px;color:var(--eqt);font-weight:600;user-select:none;list-style:none;">&#9881; Advanced &mdash; custom buckets</summary>
+          <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;background:var(--bg);padding:12px 14px;border-radius:8px;">
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <span style="font-size:10.5px;color:var(--sub)">Alpha edges (%)</span>
+              <input type="text" id="s4-aEdges" placeholder="auto" style="font:inherit;font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;width:230px">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <span style="font-size:10.5px;color:var(--sub)">SI return edges (%)</span>
+              <input type="text" id="s4-rEdges" placeholder="auto" style="font:inherit;font-size:12px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;width:230px">
+            </div>
+            <div style="font-size:10.5px;color:var(--sub);max-width:240px;line-height:1.5;align-self:center">Leave <code>auto</code> or type interior edges e.g. <code>0,5,10,15,20</code>. Tails added automatically.</div>
+          </div>
+        </details>
+      </div>
+
+      <!-- Metric cards -->
+      <div id="s4-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding:16px 20px 4px;"></div>
+    </div>
+
+    <!-- Charts + tables -->
+    <div style="display:grid;grid-template-columns:1fr;gap:16px;">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-l">
+            <span class="sec-badge" style="background:#DCFCE7;color:#15803D;border-color:#86EFAC">Alpha</span>
+            <span class="card-title">Alpha distribution &mdash; % of clients</span>
+          </div>
+          <div class="card-note">Client SI return &minus; benchmark</div>
+        </div>
+        <div class="chart-body"><div class="chart-wrap" style="height:320px"><canvas id="s4-alphaChart"></canvas></div></div>
+        <div style="padding:0 20px 18px" id="s4-alphaTbl"></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-l">
+            <span class="sec-badge" style="background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE">SI Return</span>
+            <span class="card-title">Since-inception return distribution &mdash; % of clients</span>
+          </div>
+          <div class="card-note">Absolute, non-annualised</div>
+        </div>
+        <div class="chart-body"><div class="chart-wrap" style="height:320px"><canvas id="s4-retChart"></canvas></div></div>
+        <div style="padding:0 20px 18px" id="s4-retTbl"></div>
+      </div>
+    </div>
+
+  </div>
+
 </main>
 <footer>Allocate PMS &middot; Ionic Wealth Management &middot; Internal Use Only</footer>
 
@@ -369,6 +455,7 @@ function showSec(id, btn) {
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
   if (id==='s3') renderS3();
+  if (id==='s4') s4Render();
 }
 
 /* ─ PERIOD ─ */
@@ -716,6 +803,125 @@ function renderS3() {
     }
   });
 }
+
+
+/* ─ S4: PERFORMANCE DISTRIBUTION ──────────────────────────── */
+const S4DATA = {"asOn":"31/05/2026","asOnISO":"2026-05-31","schemes":[{"id":"9","name":"Moderate","fee":"Nifty 50 TRI-50%, Nifty Arbitrage Index-50%"},{"id":"10","name":"Aggressive","fee":"Nifty 50 TRI-80%, Nifty Arbitrage Index-20%"},{"id":"11","name":"Equity","fee":"Nifty 50 TRI"}],"clients":[{"n":"Arun Kumar Sharma","s":"9","inc":"2025-04-17","si":33.7,"b":4.57,"a":29.13},{"n":"Rammohan Padiyath","s":"9","inc":"2025-04-21","si":33.27,"b":3.68,"a":29.59},{"n":"Srinidhi Karthik B S","s":"9","inc":"2025-05-08","si":33.21,"b":2.35,"a":30.86},{"n":"Vinayak Sadashiv Kore","s":"9","inc":"2025-06-03","si":28.5,"b":1.44,"a":27.06},{"n":"Angel One Wealth Limited","s":"9","inc":"2025-06-05","si":28.26,"b":1.56,"a":26.7},{"n":"Amrit Anand Bhandari","s":"9","inc":"2025-06-30","si":26.82,"b":-0.66,"a":27.48},{"n":"Sushma Saraogi","s":"9","inc":"2025-07-02","si":26.45,"b":-0.51,"a":26.96},{"n":"Rajashree Ashok Jadhav","s":"9","inc":"2025-07-17","si":24.89,"b":-0.08,"a":24.97},{"n":"Munish Saxena","s":"9","inc":"2025-07-28","si":24.83,"b":0.5,"a":24.33},{"n":"Sumit Chandra Sinha","s":"9","inc":"2025-10-27","si":14.46,"b":-2.26,"a":16.72},{"n":"Reeta Mittal","s":"9","inc":"2025-08-20","si":22.1,"b":-0.07,"a":22.17},{"n":"Asha Bakshi","s":"9","inc":"2025-09-17","si":20.42,"b":-0.81,"a":21.23},{"n":"Urvashi Kar","s":"9","inc":"2025-10-03","si":16.74,"b":-0.26,"a":17.0},{"n":"Latika Dikshit","s":"9","inc":"2025-11-07","si":14.36,"b":-1.91,"a":16.27},{"n":"Neeti Sharma","s":"9","inc":"2025-11-28","si":9.93,"b":-3.4,"a":13.33},{"n":"Aarti Malhotra","s":"9","inc":"2025-12-04","si":9.55,"b":-3.05,"a":12.6},{"n":"Mankiran M Chowhan","s":"9","inc":"2025-12-05","si":8.81,"b":-3.13,"a":11.94},{"n":"Kishan Pathani","s":"9","inc":"2025-12-12","si":6.85,"b":-2.96,"a":9.81},{"n":"Neelam Sinha","s":"9","inc":"2025-12-29","si":4.88,"b":-3.37,"a":8.25},{"n":"Anshu Juneja","s":"9","inc":"2025-12-24","si":4.74,"b":-3.58,"a":8.32},{"n":"Priya Datta","s":"9","inc":"2025-12-31","si":6.87,"b":-3.22,"a":10.09},{"n":"Sachin Kumar Sharma","s":"9","inc":"2026-01-07","si":4.22,"b":-3.75,"a":7.97},{"n":"Amresh Dhawan","s":"9","inc":"2025-12-26","si":4.67,"b":-3.52,"a":8.19},{"n":"Garima Rishi Sain","s":"9","inc":"2026-01-01","si":4.57,"b":-3.58,"a":8.15},{"n":"Gaganpal Singh Anand","s":"9","inc":"2026-01-06","si":3.86,"b":-3.91,"a":7.77},{"n":"Vivek Kumar","s":"9","inc":"2026-01-02","si":4.47,"b":-3.64,"a":8.11},{"n":"Sunil Malhotra","s":"9","inc":"2026-01-05","si":2.96,"b":-3.97,"a":6.93},{"n":"Harjit Singh Karwal","s":"9","inc":"2026-01-09","si":4.72,"b":-3.23,"a":7.95},{"n":"Usha Sukomal Majumdar","s":"9","inc":"2026-01-27","si":3.05,"b":-1.9,"a":4.95},{"n":"Kalyan Kamalkinkar Chakravarti","s":"9","inc":"2026-01-30","si":2.38,"b":-2.76,"a":5.14},{"n":"Bhabuthmal Nirmal Kumar","s":"9","inc":"2026-02-03","si":1.7,"b":-2.24,"a":3.94},{"n":"Himen Doley","s":"9","inc":"2026-02-03","si":1.88,"b":-2.24,"a":4.12},{"n":"Apurv Real Estates Private Limited","s":"9","inc":"2026-02-05","si":1.88,"b":-3.48,"a":5.36},{"n":"Sujot Malhotra","s":"9","inc":"2026-02-11","si":0.73,"b":-3.83,"a":4.56},{"n":"Curion Education Private Limited","s":"9","inc":"2026-02-06","si":1.95,"b":-3.24,"a":5.19},{"n":"Sairaj Tukaram Jadhav","s":"9","inc":"2026-02-09","si":1.14,"b":-3.4,"a":4.54},{"n":"Tusha Modi","s":"9","inc":"2026-02-11","si":0.73,"b":-3.83,"a":4.56},{"n":"Deepak Sud","s":"9","inc":"2026-02-12","si":2.04,"b":-3.88,"a":5.92},{"n":"Swati Agrawal","s":"9","inc":"2026-02-18","si":1.99,"b":-3.53,"a":5.52},{"n":"Sanjay Gupta","s":"9","inc":"2026-02-17","si":1.8,"b":-3.42,"a":5.22},{"n":"Puneet Gupta","s":"9","inc":"2026-02-20","si":0.26,"b":-3.08,"a":3.34},{"n":"Patil Sambhaji Dnyanoba","s":"9","inc":"2026-02-27","si":1.67,"b":-3.21,"a":4.88},{"n":"Patil Sandhya Sambhaji","s":"9","inc":"2026-02-27","si":1.67,"b":-3.21,"a":4.88},{"n":"Anubhuti Badoni","s":"9","inc":"2026-03-11","si":4.47,"b":-0.89,"a":5.36},{"n":"Sonia Khanna","s":"9","inc":"2026-02-23","si":1.72,"b":-3.27,"a":4.99},{"n":"Tukaram Sakharam Jadhav","s":"9","inc":"2026-02-27","si":1.33,"b":-3.21,"a":4.54},{"n":"Rahul Sethi","s":"9","inc":"2026-02-23","si":1.37,"b":-3.27,"a":4.64},{"n":"Punita Sharma","s":"9","inc":"2026-02-25","si":-2.38,"b":-3.03,"a":0.65},{"n":"Arun Kumar Mittal","s":"9","inc":"2026-02-25","si":0.99,"b":-3.03,"a":4.02},{"n":"Markos Vellapally","s":"9","inc":"2026-03-12","si":5.74,"b":-0.17,"a":5.91},{"n":"Porus Arora","s":"9","inc":"2026-03-05","si":4.59,"b":-1.35,"a":5.94},{"n":"Narinder Kumar Puri","s":"9","inc":"2026-03-18","si":6.29,"b":0.36,"a":5.93},{"n":"Sanjeev Ahuja","s":"9","inc":"2026-02-27","si":2.09,"b":-3.21,"a":5.3},{"n":"Dinesh Ramavtar Kanoria","s":"9","inc":"2026-03-05","si":4.55,"b":-1.35,"a":5.9},{"n":"Thirumalnamasamudhram Padmanabhan Sridhar","s":"9","inc":"2026-03-06","si":5.07,"b":-1.93,"a":7.0},{"n":"Rakesh Aggarwal","s":"9","inc":"2026-03-17","si":4.45,"b":0.71,"a":3.74},{"n":"Randhir Gandhi","s":"9","inc":"2026-03-16","si":5.68,"b":1.32,"a":4.36},{"n":"Deepak Joshi","s":"9","inc":"2026-03-12","si":5.79,"b":-0.17,"a":5.96},{"n":"Vandana Lal","s":"9","inc":"2026-03-18","si":6.9,"b":0.36,"a":6.54},{"n":"Girish Vidyadhar Brahme","s":"9","inc":"2026-04-01","si":4.9,"b":3.07,"a":1.83},{"n":"Pradeep Champalal Jain","s":"9","inc":"2026-04-20","si":1.02,"b":-1.48,"a":2.5},{"n":"Maxim Smt Technologies Private Limited","s":"9","inc":"2026-04-17","si":1.19,"b":-1.18,"a":2.37},{"n":"Durgesh Chandrashekhar Mangeshkar","s":"9","inc":"2026-04-15","si":1.67,"b":-0.43,"a":2.1},{"n":"Preeti Agrawal","s":"9","inc":"2026-04-06","si":4.05,"b":2.11,"a":1.94},{"n":"L Sundararajan","s":"9","inc":"2026-03-31","si":5.35,"b":3.07,"a":2.28},{"n":"Onions Creative Media Private Limited","s":"9","inc":"2026-04-20","si":0.63,"b":-1.48,"a":2.11},{"n":"Seema Sunil Tiwari","s":"9","inc":"2026-04-13","si":1.68,"b":-0.8,"a":2.48},{"n":"Amit Gossain","s":"9","inc":"2026-05-13","si":0.25,"b":0.41,"a":-0.16},{"n":"Rajavelu Annapoorna Jayashree","s":"9","inc":"2026-04-16","si":1.54,"b":-1.24,"a":2.78},{"n":"Sneh Lata","s":"9","inc":"2026-04-20","si":1.02,"b":-1.48,"a":2.5},{"n":"Chitra Bahadur","s":"9","inc":"2026-04-29","si":0.99,"b":-0.82,"a":1.81},{"n":"Meena Gupta","s":"9","inc":"2026-04-23","si":1.19,"b":-1.55,"a":2.74},{"n":"Tumkur Nagasharma Pranesha","s":"9","inc":"2026-04-30","si":0.58,"b":-1.19,"a":1.77},{"n":"Sumit Garg","s":"9","inc":"2026-05-11","si":0.3,"b":-1.23,"a":1.53},{"n":"Prashanta Kumar Chakraborty","s":"9","inc":"2026-05-07","si":0.1,"b":-1.46,"a":1.56},{"n":"Suresh Devatha","s":"9","inc":"2026-05-12","si":0.63,"b":-0.51,"a":1.14},{"n":"Arti Gupta","s":"9","inc":"2026-05-13","si":0.07,"b":0.41,"a":-0.34},{"n":"Sabhapati Raghavendra","s":"9","inc":"2026-05-15","si":0.47,"b":-0.31,"a":0.78},{"n":"Shivakumar Venkappa Kalgudi","s":"9","inc":"2026-05-15","si":0.55,"b":-0.31,"a":0.86},{"n":"Sachin Kishore Kalbag","s":"9","inc":"2026-05-22","si":-0.48,"b":-0.35,"a":-0.13},{"n":"Gautami Sachin Kalbag","s":"9","inc":"2026-05-26","si":-0.64,"b":-1.13,"a":0.49},{"n":"Sriram Krishnamoorthy","s":"9","inc":"2026-05-22","si":-0.65,"b":-0.35,"a":-0.3},{"n":"Niraj Bajaj","s":"9","inc":"2026-05-22","si":-0.65,"b":-0.35,"a":-0.3},{"n":"Ram L Thakur","s":"9","inc":"2026-05-25","si":-0.48,"b":-0.46,"a":-0.02},{"n":"Kamlesh Sahu","s":"9","inc":"2026-05-22","si":-0.48,"b":-0.35,"a":-0.13},{"n":"Dhanya Malempati","s":"9","inc":"2026-05-29","si":-0.28,"b":-0.89,"a":0.61},{"n":"Jaspreet Bindra","s":"10","inc":"2025-03-28","si":27.19,"b":2.5,"a":24.69},{"n":"Anuradha Sharma","s":"10","inc":"2025-03-24","si":25.9,"b":3.36,"a":22.54},{"n":"Shivangni Kumar","s":"10","inc":"2025-03-26","si":27.05,"b":2.26,"a":24.79},{"n":"Mankiran M Chowhan","s":"10","inc":"2025-04-11","si":26.9,"b":6.73,"a":20.17},{"n":"Himani","s":"10","inc":"2025-04-22","si":23.64,"b":0.57,"a":23.07},{"n":"Tarun Surender  Ahuja","s":"10","inc":"2025-05-28","si":20.17,"b":-1.83,"a":22.0},{"n":"Shobhit  Mathur","s":"10","inc":"2025-05-05","si":24.75,"b":-0.22,"a":24.97},{"n":"Srinidhi Karthik B S","s":"10","inc":"2025-05-08","si":23.92,"b":-0.45,"a":24.37},{"n":"Anila Saldanha","s":"10","inc":"2025-05-21","si":21.35,"b":-1.34,"a":22.69},{"n":"Thomas Philip","s":"10","inc":"2025-05-28","si":19.99,"b":-1.83,"a":21.82},{"n":"Rakesh Amol","s":"10","inc":"2025-06-09","si":17.68,"b":-2.61,"a":20.29},{"n":"Anup Soni","s":"10","inc":"2025-06-10","si":17.75,"b":-2.93,"a":20.68},{"n":"Smita Badoni","s":"10","inc":"2025-07-11","si":15.67,"b":-3.96,"a":19.63},{"n":"Anubhuti Badoni","s":"10","inc":"2025-07-25","si":15.58,"b":-3.18,"a":18.76},{"n":"Suryaprakash Subbarao Konanuru","s":"10","inc":"2025-07-03","si":17.45,"b":-4.19,"a":21.64},{"n":"Manisha Natarajan","s":"10","inc":"2025-07-17","si":16.38,"b":-3.57,"a":19.95},{"n":"Neerah Kumar","s":"10","inc":"2025-07-22","si":14.71,"b":-3.26,"a":17.97},{"n":"Anuv Jain","s":"10","inc":"2025-07-24","si":14.15,"b":-3.65,"a":17.8},{"n":"Nishant Jain","s":"10","inc":"2025-08-05","si":15.79,"b":-2.26,"a":18.05},{"n":"Rajesh Anil Suvarna","s":"10","inc":"2025-09-02","si":14.05,"b":-2.17,"a":16.22},{"n":"Anuj Gupta","s":"10","inc":"2025-08-22","si":13.6,"b":-3.53,"a":17.13},{"n":"Satish Padmanabhan","s":"10","inc":"2025-08-20","si":15.57,"b":-3.2,"a":18.77},{"n":"Geeti Bhagat Datwani","s":"10","inc":"2025-10-28","si":9.12,"b":-6.43,"a":15.55},{"n":"Ashwani Gobind Keswani","s":"10","inc":"2025-09-12","si":12.23,"b":-3.38,"a":15.61},{"n":"Subramanya Koodli","s":"10","inc":"2025-09-29","si":12.11,"b":-2.36,"a":14.47},{"n":"Munmun Kalra","s":"10","inc":"2025-09-16","si":10.53,"b":-3.58,"a":14.11},{"n":"Krish Rinkesh Jain","s":"10","inc":"2025-09-25","si":12.76,"b":-3.58,"a":16.34},{"n":"Varun Jain","s":"10","inc":"2025-10-03","si":10.7,"b":-2.96,"a":13.66},{"n":"Dinesh Shyamlal Bhatia","s":"10","inc":"2025-11-03","si":8.3,"b":-5.76,"a":14.06},{"n":"Arvind Chauhan","s":"10","inc":"2025-10-03","si":11.63,"b":-2.96,"a":14.59},{"n":"Krati Chaturvedi","s":"10","inc":"2025-10-07","si":11.23,"b":-3.71,"a":14.94},{"n":"Prabal Chaturvedi","s":"10","inc":"2025-10-03","si":11.63,"b":-2.96,"a":14.59},{"n":"Awadhesh Mishra","s":"10","inc":"2025-11-06","si":9.92,"b":-5.44,"a":15.36},{"n":"Samar Tanaji Desai","s":"10","inc":"2025-10-31","si":9.02,"b":-6.21,"a":15.23},{"n":"Debanjan Banerjee","s":"10","inc":"2025-11-19","si":8.03,"b":-6.43,"a":14.46},{"n":"Sree Kirat Patel","s":"10","inc":"2025-11-11","si":7.54,"b":-5.42,"a":12.96},{"n":"Akshay Jammalamadaka Sarma","s":"10","inc":"2025-11-18","si":8.53,"b":-6.71,"a":15.24},{"n":"Dev Deepika","s":"10","inc":"2025-11-14","si":8.83,"b":-6.31,"a":15.14},{"n":"Sudip Kumar Pal","s":"10","inc":"2025-11-18","si":8.57,"b":-6.71,"a":15.28},{"n":"Shailendra Sabhnani","s":"10","inc":"2025-12-09","si":7.11,"b":-6.64,"a":13.75},{"n":"Shampa Roy Shahani","s":"10","inc":"2025-12-05","si":6.39,"b":-6.82,"a":13.21},{"n":"Neeti Sharma","s":"10","inc":"2025-11-28","si":7.08,"b":-7.3,"a":14.38},{"n":"Samir Padmakar Chavare","s":"10","inc":"2025-11-28","si":7.14,"b":-7.3,"a":14.44},{"n":"Mandar Prakash Barve","s":"10","inc":"2025-12-08","si":7.04,"b":-7.25,"a":14.29},{"n":"Srinarayan Jhunjhunwala","s":"10","inc":"2025-12-02","si":6.78,"b":-7.21,"a":13.99},{"n":"Priya Chandrakant Mahajan","s":"10","inc":"2025-12-02","si":6.46,"b":-7.21,"a":13.67},{"n":"SAMUEL GEORGES LEON ZIZA","s":"10","inc":"2025-12-09","si":6.99,"b":-6.64,"a":13.63},{"n":"Radhika Aggarwal","s":"10","inc":"2025-12-08","si":7.37,"b":-7.25,"a":14.62},{"n":"Akshat Sardana","s":"10","inc":"2025-12-09","si":7.22,"b":-6.64,"a":13.86},{"n":"Sniami Solutions Private Limited","s":"10","inc":"2025-12-16","si":7.46,"b":-6.85,"a":14.31},{"n":"Sudhir Shukla","s":"10","inc":"2025-12-24","si":4.69,"b":-7.3,"a":11.99},{"n":"Nimish Jayantilal Patel","s":"10","inc":"2025-12-31","si":3.95,"b":-6.66,"a":10.61},{"n":"Puneet Bagga","s":"10","inc":"2025-12-31","si":3.93,"b":-6.66,"a":10.59},{"n":"Saroj Ramkumar Yadav","s":"10","inc":"2026-01-01","si":3.62,"b":-7.2,"a":10.82},{"n":"Kanan P Naheta","s":"10","inc":"2025-12-22","si":4.81,"b":-6.69,"a":11.5},{"n":"Abhay Datta","s":"10","inc":"2025-12-31","si":4.88,"b":-6.66,"a":11.54},{"n":"Sachin Kumar Sharma","s":"10","inc":"2026-01-07","si":3.06,"b":-7.37,"a":10.43},{"n":"Manish Shara","s":"10","inc":"2026-02-10","si":1.52,"b":-6.76,"a":8.28},{"n":"Prateek Shroff","s":"10","inc":"2026-01-08","si":4.28,"b":-7.27,"a":11.55},{"n":"Tapan Dixit","s":"10","inc":"2026-01-12","si":3.66,"b":-5.98,"a":9.64},{"n":"Gargi Kapoor","s":"10","inc":"2026-01-29","si":2.26,"b":-5.17,"a":7.43},{"n":"Nirupama Pandey","s":"10","inc":"2026-01-12","si":3.49,"b":-5.98,"a":9.47},{"n":"Rohit Kapoor","s":"10","inc":"2026-01-20","si":2.12,"b":-5.81,"a":7.93},{"n":"Susan Mathews Zachariah","s":"10","inc":"2026-02-19","si":1.41,"b":-6.66,"a":8.07},{"n":"Anuranjan Kumar","s":"10","inc":"2026-01-22","si":3.94,"b":-4.55,"a":8.49},{"n":"Sanjay Aggarwal","s":"10","inc":"2026-01-20","si":3.45,"b":-5.81,"a":9.26},{"n":"Shishir Vijaykumar Agarwal","s":"10","inc":"2026-01-22","si":2.93,"b":-4.55,"a":7.48},{"n":"Aayush Aggarwal","s":"10","inc":"2026-02-19","si":2.5,"b":-6.66,"a":9.16},{"n":"Sachin Kishore Kalbag","s":"10","inc":"2026-02-03","si":2.34,"b":-4.45,"a":6.79},{"n":"Ashish Sabharwal","s":"10","inc":"2026-01-28","si":2.6,"b":-4.62,"a":7.22},{"n":"Neeraj Prakash Bahulekar","s":"10","inc":"2026-02-11","si":1.05,"b":-6.95,"a":8.0},{"n":"Bawa Paints Jammu Private Limited","s":"10","inc":"2026-02-10","si":1.23,"b":-6.76,"a":7.99},{"n":"Anshul Guleria","s":"10","inc":"2026-01-30","si":3.23,"b":-5.39,"a":8.62},{"n":"Rajat Kumar Jain","s":"10","inc":"2026-02-02","si":5.18,"b":-3.66,"a":8.84},{"n":"Chandon Kalyan Chakravarti","s":"10","inc":"2026-01-30","si":3.42,"b":-5.39,"a":8.81},{"n":"Riddhi Jhankharia","s":"10","inc":"2026-02-04","si":2.06,"b":-6.3,"a":8.36},{"n":"Venkata Naga Srinivas Gadamsetty","s":"10","inc":"2026-03-06","si":7.07,"b":-3.61,"a":10.68},{"n":"Divya Ashta","s":"10","inc":"2026-02-24","si":0.82,"b":-6.37,"a":7.19},{"n":"Vivek Punmalerai Koroth","s":"10","inc":"2026-02-05","si":2.87,"b":-6.45,"a":9.32},{"n":"Karishma Jeetendra Kolte","s":"10","inc":"2026-02-06","si":2.46,"b":-6.07,"a":8.53},{"n":"Sanjay Kalra","s":"10","inc":"2026-02-12","si":1.75,"b":-7.01,"a":8.76},{"n":"Saji Abraham","s":"10","inc":"2026-02-13","si":2.37,"b":-6.59,"a":8.96},{"n":"Kranti Prasad Munje","s":"10","inc":"2026-02-12","si":2.55,"b":-7.01,"a":9.56},{"n":"Shriniwas Shrikrishna Patwardhan","s":"10","inc":"2026-02-11","si":1.31,"b":-6.95,"a":8.26},{"n":"Rita Janssen","s":"10","inc":"2026-02-16","si":1.18,"b":-5.63,"a":6.81},{"n":"Manas Puri","s":"10","inc":"2026-02-12","si":3.47,"b":-7.01,"a":10.48},{"n":"Sanjay Gupta","s":"10","inc":"2026-02-17","si":1.09,"b":-6.25,"a":7.34},{"n":"Kanav Rishi Kumar","s":"10","inc":"2026-02-17","si":1.17,"b":-6.25,"a":7.42},{"n":"Sonia Khanna","s":"10","inc":"2026-02-19","si":2.06,"b":-6.66,"a":8.72},{"n":"Mayank Tewari Huf","s":"10","inc":"2026-02-20","si":2.65,"b":-5.62,"a":8.27},{"n":"Aramaiti Burjor Vachha","s":"10","inc":"2026-02-23","si":2.74,"b":-5.95,"a":8.69},{"n":"Surender Kumar Ahuja","s":"10","inc":"2026-02-24","si":2.22,"b":-6.37,"a":8.59},{"n":"Mathews Zachariah Muthalaly","s":"10","inc":"2026-02-25","si":2.38,"b":-5.54,"a":7.92},{"n":"Pankaj Kankar","s":"10","inc":"2026-04-13","si":1.73,"b":-1.47,"a":3.2},{"n":"Palathirthapu Ramesh","s":"10","inc":"2026-02-20","si":0.7,"b":-5.62,"a":6.32},{"n":"Abhishek Kumar","s":"10","inc":"2026-03-19","si":8.93,"b":-0.52,"a":9.45},{"n":"Amit Pranab Kumar Majumdar","s":"10","inc":"2026-02-24","si":1.58,"b":-6.37,"a":7.95},{"n":"Sanjeev Ahuja","s":"10","inc":"2026-02-27","si":3.04,"b":-5.77,"a":8.81},{"n":"Swarup Anand Mohanty","s":"10","inc":"2026-02-25","si":2.06,"b":-5.54,"a":7.6},{"n":"Balaji Kalyanasundaram","s":"10","inc":"2026-05-22","si":-0.02,"b":-0.36,"a":0.34},{"n":"Lalitha Sekhar","s":"10","inc":"2026-02-26","si":2.52,"b":-5.72,"a":8.24},{"n":"Kushali Abhishek Goenka","s":"10","inc":"2026-02-25","si":2.07,"b":-5.54,"a":7.61},{"n":"Rupali Goverdhan Gotecha","s":"10","inc":"2026-02-27","si":3.25,"b":-5.77,"a":9.02},{"n":"Mani Sawhney","s":"10","inc":"2026-03-19","si":8.95,"b":-0.52,"a":9.47},{"n":"Sanjiv Omkarnath Wazir","s":"10","inc":"2026-03-02","si":6.21,"b":-4.82,"a":11.03},{"n":"Levllyn Joseph Luis Souza Rocha","s":"10","inc":"2026-03-16","si":8.25,"b":1.67,"a":6.58},{"n":"Punya Prabha Maddu","s":"10","inc":"2026-03-19","si":8.98,"b":-0.52,"a":9.5},{"n":"Suchit Ashok Vesawkar","s":"10","inc":"2026-03-06","si":6.19,"b":-3.61,"a":9.8},{"n":"Dinesh Ramavtar Kanoria","s":"10","inc":"2026-03-05","si":5.82,"b":-2.72,"a":8.54},{"n":"Interport Global Logistics Private Limited","s":"10","inc":"2026-03-25","si":8.55,"b":2.48,"a":6.07},{"n":"Sunil Malhotra","s":"10","inc":"2026-03-11","si":7.26,"b":-2.02,"a":9.28},{"n":"Sanjaykumar Lakhabhai Patel","s":"10","inc":"2026-05-06","si":0.03,"b":-1.48,"a":1.51},{"n":"Kiran Navanit Shah","s":"10","inc":"2026-03-27","si":9.36,"b":1.08,"a":8.28},{"n":"Priya Datta","s":"10","inc":"2026-03-16","si":8.59,"b":1.67,"a":6.92},{"n":"Vrinda Ghanashyam Soman","s":"10","inc":"2026-03-16","si":7.42,"b":1.67,"a":5.75},{"n":"Nita Ashwani Keswani","s":"10","inc":"2026-03-16","si":8.29,"b":1.67,"a":6.62},{"n":"Bidisha Ray Samajpati","s":"10","inc":"2026-03-18","si":8.39,"b":0.17,"a":8.22},{"n":"Rudra Narain Chaudhuri","s":"10","inc":"2026-03-23","si":10.61,"b":1.77,"a":8.84},{"n":"Subramanian Srikanths","s":"10","inc":"2026-03-20","si":7.54,"b":2.19,"a":5.35},{"n":"Ravindra Bhalchandra Joshi","s":"10","inc":"2026-03-24","si":7.25,"b":3.94,"a":3.31},{"n":"Manit Saluja","s":"10","inc":"2026-04-20","si":1.07,"b":-2.47,"a":3.54},{"n":"Sanjeev Sethi","s":"10","inc":"2026-04-16","si":1.5,"b":-2.08,"a":3.58},{"n":"Edchola Krishnan Unni","s":"10","inc":"2026-03-31","si":9.45,"b":4.61,"a":4.84},{"n":"Raghavendran Balasubramaniam","s":"10","inc":"2026-03-23","si":9.69,"b":1.77,"a":7.92},{"n":"Rekha Nahata","s":"10","inc":"2026-03-27","si":9.36,"b":1.08,"a":8.28},{"n":"Pritam Arvind Choudhari","s":"10","inc":"2026-04-17","si":1.27,"b":-1.98,"a":3.25},{"n":"Panna Chugh","s":"10","inc":"2026-03-27","si":11.98,"b":1.08,"a":10.9},{"n":"Ashutosh Medicare Private Limited","s":"10","inc":"2026-03-27","si":9.47,"b":1.08,"a":8.39},{"n":"Balaji Auto Commercial Vehicles Private Limited","s":"10","inc":"2026-04-07","si":2.86,"b":2.26,"a":0.6},{"n":"Manish Thapa","s":"10","inc":"2026-04-02","si":4.73,"b":3.33,"a":1.4},{"n":"Bhimarao Gururajan Sudhakar","s":"10","inc":"2026-04-02","si":5.14,"b":3.33,"a":1.81},{"n":"Janesh Nair","s":"10","inc":"2026-04-01","si":5.9,"b":4.61,"a":1.29},{"n":"Preeti Kona Pal","s":"10","inc":"2026-04-01","si":6.01,"b":4.61,"a":1.4},{"n":"Neelakantan Natarajan","s":"10","inc":"2026-04-13","si":1.87,"b":-1.47,"a":3.34},{"n":"Anil Kapoor","s":"10","inc":"2026-04-15","si":1.73,"b":-0.81,"a":2.54},{"n":"Naresh Chander Gupta","s":"10","inc":"2026-04-15","si":1.63,"b":-0.81,"a":2.44},{"n":"Bambam Sanjay Choudhary","s":"10","inc":"2026-04-16","si":1.5,"b":-2.08,"a":3.58},{"n":"Jatin Vinod Shah","s":"10","inc":"2026-04-27","si":0.95,"b":-1.02,"a":1.97},{"n":"Rohit Tumkur Pranesha","s":"10","inc":"2026-04-30","si":0.89,"b":-1.95,"a":2.84},{"n":"Sushil Kumar Prasad","s":"10","inc":"2026-04-20","si":1.47,"b":-2.47,"a":3.94},{"n":"Mayank Tewari Beneficiary Trust","s":"10","inc":"2026-04-27","si":0.95,"b":-1.02,"a":1.97},{"n":"Manish Dilip Tahalyani","s":"10","inc":"2026-04-27","si":0.93,"b":-1.02,"a":1.95},{"n":"Ajay Goel","s":"10","inc":"2026-05-20","si":0.33,"b":-0.22,"a":0.55},{"n":"Bhupender Singh","s":"10","inc":"2026-04-29","si":0.9,"b":-1.36,"a":2.26},{"n":"Abhay Vyas","s":"10","inc":"2026-04-30","si":0.97,"b":-1.95,"a":2.92},{"n":"Shaila Shringi","s":"10","inc":"2026-04-30","si":0.05,"b":-1.95,"a":2.0},{"n":"Tumkur Nagasharma Pranesha","s":"10","inc":"2026-04-30","si":0.29,"b":-1.95,"a":2.24},{"n":"Manju Akshay Saksena","s":"10","inc":"2026-05-18","si":0.69,"b":-0.3,"a":0.99},{"n":"Garima Patet","s":"10","inc":"2026-04-30","si":0.05,"b":-1.95,"a":2.0},{"n":"Praveen Narayanan Nair","s":"10","inc":"2026-05-08","si":0.37,"b":-2.44,"a":2.81},{"n":"Tushar Banerjee","s":"10","inc":"2026-05-06","si":0.88,"b":-1.48,"a":2.36},{"n":"Kantamuneni Venkatasiva Rao","s":"10","inc":"2026-05-07","si":0.39,"b":-2.42,"a":2.81},{"n":"Nishant Devendra Kumar Jain HUF","s":"10","inc":"2026-05-06","si":0.37,"b":-1.48,"a":1.85},{"n":"Sushant Dash","s":"10","inc":"2026-05-13","si":0.17,"b":0.69,"a":-0.52},{"n":"Janani Sekhar","s":"10","inc":"2026-05-12","si":1.13,"b":-0.78,"a":1.91},{"n":"Sathish Kumar Thangaraj","s":"10","inc":"2026-05-15","si":1.21,"b":-0.39,"a":1.6},{"n":"Susmitha Panchangam","s":"10","inc":"2026-05-19","si":0.28,"b":-0.32,"a":0.6},{"n":"Shiraz Askari","s":"10","inc":"2026-05-13","si":0.99,"b":0.69,"a":0.3},{"n":"Punita Dhirajlal Patel","s":"10","inc":"2026-05-14","si":1.12,"b":0.58,"a":0.54},{"n":"Buddala Venkata Satyanarayana","s":"10","inc":"2026-05-29","si":0.0,"b":-1.25,"a":1.25},{"n":"Santosh Khushalsingh Kudale  Huf","s":"10","inc":"2026-05-26","si":-0.48,"b":-1.65,"a":1.17},{"n":"Shubhra Gupta","s":"10","inc":"2026-05-18","si":0.34,"b":-0.3,"a":0.64},{"n":"Shefali Samir Chinoy","s":"10","inc":"2026-05-15","si":1.12,"b":-0.39,"a":1.51},{"n":"Shivakumar Venkappa Kalgudi","s":"10","inc":"2026-05-15","si":0.73,"b":-0.39,"a":1.12},{"n":"Sainath Ramakant Dabholkar","s":"10","inc":"2026-05-26","si":-0.51,"b":-1.65,"a":1.14},{"n":"Chetan Vilas Tinaikar","s":"10","inc":"2026-05-21","si":-0.04,"b":-0.35,"a":0.31},{"n":"Kiran Subhash Kasane","s":"10","inc":"2026-05-25","si":-0.73,"b":-0.59,"a":-0.14},{"n":"Sriram Krishnamoorthy","s":"10","inc":"2026-05-22","si":-0.88,"b":-0.36,"a":-0.52},{"n":"Niraj Bajaj","s":"10","inc":"2026-05-22","si":-0.88,"b":-0.36,"a":-0.52},{"n":"Geeta Sarosh Karani","s":"11","inc":"2025-03-21","si":14.74,"b":2.86,"a":11.88},{"n":"Sarosh Nadirshaw Karani","s":"11","inc":"2025-03-26","si":16.42,"b":0.78,"a":15.64},{"n":"Zoeb Habib","s":"11","inc":"2025-03-31","si":17.25,"b":1.42,"a":15.83},{"n":"Naresh Chander Gupta","s":"11","inc":"2025-04-22","si":13.56,"b":-1.13,"a":14.69},{"n":"Srinidhi Karthik B S","s":"11","inc":"2025-05-08","si":12.85,"b":-2.31,"a":15.16},{"n":"Jatin Piyush Kothari","s":"11","inc":"2025-05-08","si":13.79,"b":-2.31,"a":16.1},{"n":"Akhilesh Chaudhary","s":"11","inc":"2025-05-12","si":11.47,"b":-0.66,"a":12.13},{"n":"Vaibhav Subhash Agrawal","s":"11","inc":"2025-05-20","si":11.43,"b":-4.45,"a":15.88},{"n":"Subramanian Srikanths","s":"11","inc":"2025-05-14","si":10.04,"b":-2.97,"a":13.01},{"n":"Rajni Bachani","s":"11","inc":"2025-05-19","si":11.57,"b":-4.73,"a":16.3},{"n":"Anil Ramanbhai Patel","s":"11","inc":"2025-06-20","si":10.35,"b":-4.09,"a":14.44},{"n":"Ravindra Krishna Kulkarni","s":"11","inc":"2025-06-30","si":7.31,"b":-7.41,"a":14.72},{"n":"Vivek Kumar","s":"11","inc":"2025-07-04","si":8.07,"b":-6.56,"a":14.63},{"n":"Vishal  Kumar Rakyan","s":"11","inc":"2025-07-16","si":6.66,"b":-5.83,"a":12.49},{"n":"Sanjaykumar   Lakhabhai Patel","s":"11","inc":"2025-07-30","si":6.88,"b":-4.53,"a":11.41},{"n":"Menaka Desikachar","s":"11","inc":"2025-07-23","si":5.93,"b":-5.38,"a":11.31},{"n":"Agniswar Bakshi","s":"11","inc":"2025-07-30","si":7.16,"b":-4.53,"a":11.69},{"n":"Vijay Dinesh Thakkar","s":"11","inc":"2025-07-30","si":7.05,"b":-4.53,"a":11.58},{"n":"Garima Rishi Sain","s":"11","inc":"2025-07-30","si":7.76,"b":-4.53,"a":12.29},{"n":"Latika  Dikshit","s":"11","inc":"2025-08-06","si":9.27,"b":-3.89,"a":13.16},{"n":"Mamta Deepal Shah","s":"11","inc":"2025-08-06","si":9.1,"b":-3.89,"a":12.99},{"n":"Peush Jain","s":"11","inc":"2025-08-19","si":5.77,"b":2.03,"a":3.74},{"n":"Arun Kumar Mittal","s":"11","inc":"2025-08-20","si":7.27,"b":-5.29,"a":12.56},{"n":"Nupur Agrawal","s":"11","inc":"2025-08-29","si":7.9,"b":-3.44,"a":11.34},{"n":"Jyotiswarup Pai Raiturkar","s":"11","inc":"2025-09-05","si":7.87,"b":-4.37,"a":12.24},{"n":"Chetan Vilas Tinaikar","s":"11","inc":"2025-09-15","si":6.47,"b":-5.82,"a":12.29},{"n":"Subandhu Kumar","s":"11","inc":"2025-09-11","si":6.73,"b":-5.29,"a":12.02},{"n":"Beenu Agarwal","s":"11","inc":"2025-09-25","si":7.75,"b":-5.6,"a":13.35},{"n":"Rahul Yadav","s":"11","inc":"2025-10-29","si":4.25,"b":-8.89,"a":13.14},{"n":"Vikram Amarnath Alva","s":"11","inc":"2025-10-20","si":5.39,"b":-8.02,"a":13.41},{"n":"Mikhail John Verma","s":"11","inc":"2025-12-09","si":5.16,"b":-9.02,"a":14.18},{"n":"Shivani Aggarwal","s":"11","inc":"2025-12-09","si":5.6,"b":-9.02,"a":14.62},{"n":"Akshat Sardana","s":"11","inc":"2025-12-09","si":5.04,"b":-9.02,"a":14.06},{"n":"Sniami Solutions Private Limited","s":"11","inc":"2025-12-16","si":4.9,"b":-9.26,"a":14.16},{"n":"Rahul Sethi","s":"11","inc":"2026-01-22","si":4.54,"b":-6.18,"a":10.72},{"n":"Priya Agarwal","s":"11","inc":"2026-03-02","si":5.27,"b":-6.3,"a":11.57},{"n":"Naresh Arora","s":"11","inc":"2026-03-20","si":8.45,"b":2.56,"a":5.89}]};
+(function(){
+  const NAVY='#12205B', GREEN='#16A34A', RED='#DC2626', BLUE='#5B8DEF';
+  const asOn = new Date(2026,4,31);
+  let st4 = { scheme:'All', track:'all' };
+
+  function parseISO(s){ if(!s) return null; const p=s.split('-'); return new Date(+p[0],+p[1]-1,+p[2]); }
+  function monthsBefore(d,m){ const x=new Date(d.getTime()); x.setMonth(x.getMonth()-m); return x; }
+  function mean(a){ return a.length? a.reduce((x,y)=>x+y,0)/a.length : 0; }
+  function median(a){ if(!a.length) return 0; const s=[...a].sort((x,y)=>x-y); const m=s.length>>1; return s.length%2? s[m] : (s[m-1]+s[m])/2; }
+  function fmtE(x){ return (x===Math.round(x))? String(Math.round(x)) : (Math.round(x*100)/100).toString(); }
+
+  function niceEdges(vals){
+    const target=7; let vmin=Math.min(...vals), vmax=Math.max(...vals); let span=(vmax-vmin)||1;
+    const steps=[0.25,0.5,1,2,2.5,5,10,20,25,50]; let step=steps[steps.length-1];
+    for(const s of steps){ if(span/s<=target){ step=s; break; } }
+    let start=Math.floor(vmin/step)*step, end=Math.ceil(vmax/step)*step; if(end<=start) end=start+step;
+    const edges=[]; let e=start; while(e<=end+1e-9){ edges.push(Math.round(e*1e4)/1e4); e+=step; } return edges;
+  }
+  function edgesFromInput(text, vals){
+    const t=(text||'').trim().toLowerCase();
+    if(t===''||t==='auto') return niceEdges(vals);
+    const interior=t.split(/[,\s]+/).map(parseFloat).filter(x=>isFinite(x)).sort((a,b)=>a-b);
+    if(!interior.length) return niceEdges(vals);
+    return [-Infinity, ...interior, Infinity];
+  }
+  function distribute(vals, edges){
+    const k=edges.length-1, counts=new Array(k).fill(0);
+    for(const v of vals){ for(let b=0;b<k;b++){ const lo=edges[b], hi=edges[b+1], last=(b===k-1);
+      if((lo<=v&&v<hi)||(last&&v===hi)){ counts[b]++; break; } } }
+    const labels=[]; for(let b=0;b<k;b++){ const lo=edges[b], hi=edges[b+1];
+      if(lo===-Infinity) labels.push('< '+fmtE(hi)+'%');
+      else if(hi===Infinity) labels.push('> '+fmtE(lo)+'%');
+      else labels.push(fmtE(lo)+' to '+fmtE(hi)+'%'); }
+    return {labels, counts, edges};
+  }
+  function filtered(){
+    let out=S4DATA.clients.slice();
+    if(st4.scheme!=='All') out=out.filter(c=>c.s===st4.scheme);
+    if(st4.track==='3m') out=out.filter(c=>parseISO(c.inc)<=monthsBefore(asOn,3));
+    else if(st4.track==='6m') out=out.filter(c=>parseISO(c.inc)<=monthsBefore(asOn,6));
+    else if(st4.track==='1y') out=out.filter(c=>parseISO(c.inc)<=monthsBefore(asOn,12));
+    return out;
+  }
+  function cardHTML(lbl,val,color){
+    return '<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px">'+
+           '<div style="font-size:11px;color:var(--sub)">'+lbl+'</div>'+
+           '<div style="font-size:21px;font-weight:700;margin-top:4px;color:'+(color||'var(--text)')+'">'+val+'</div></div>';
+  }
+  function renderCards(cl){
+    const al=cl.map(c=>c.a), si=cl.map(c=>c.si), n=cl.length;
+    const beat=al.filter(a=>a>0).length;
+    const sgn=v=>(v>=0?'+':'')+v.toFixed(2)+'%';
+    const mA=mean(al), mS=mean(si);
+    document.getElementById('s4-cards').innerHTML=[
+      cardHTML('Clients', n, NAVY),
+      cardHTML('Mean alpha', sgn(mA), mA>=0?GREEN:RED),
+      cardHTML('Median alpha', sgn(median(al)), median(al)>=0?GREEN:RED),
+      cardHTML('Beating benchmark', n? beat+' <span style="font-size:13px;color:var(--sub)">('+Math.round(100*beat/n)+'%)</span>':'0', GREEN),
+      cardHTML('Mean SI return', sgn(mS), mS>=0?GREEN:RED),
+      cardHTML('Median SI return', sgn(median(si)), median(si)>=0?GREEN:RED),
+    ].join('');
+  }
+  function renderTable(id,d,n){
+    if(!n){ document.getElementById(id).innerHTML='<p style="color:var(--sub);font-size:13px;padding:14px 0">No clients match the current filters.</p>'; return; }
+    const tot=d.counts.reduce((a,b)=>a+b,0);
+    const rows=d.labels.map((l,i)=>'<tr><td class="lc">'+l+'</td><td>'+d.counts[i]+'</td><td>'+(100*d.counts[i]/n).toFixed(1)+'%</td></tr>').join('');
+    document.getElementById(id).innerHTML=
+      '<table class="tbl" style="font-size:12.5px"><thead><tr>'+
+      '<th class="lh">Interval</th><th class="lh" style="text-align:right"># Clients</th><th class="lh" style="text-align:right">% Clients</th>'+
+      '</tr></thead><tbody>'+rows+
+      '<tr class="tot"><td class="lc">TOTAL</td><td>'+tot+'</td><td>100.0%</td></tr></tbody></table>';
+  }
+  const charts={};
+  function renderChart(id,d,n,kind){
+    const pct=d.counts.map(c=> n? +(100*c/n).toFixed(1):0);
+    const colors=d.labels.map((l,i)=>{
+      if(kind==='alpha'){ const lo=d.edges[i]; return (lo<0 && d.edges[i+1]<=0.0001)? 'rgba(220,38,38,0.82)' : (lo<0? 'rgba(249,115,22,0.82)':'rgba(22,163,74,0.82)'); }
+      return 'rgba(91,141,239,0.82)';
+    });
+    if(charts[id]) charts[id].destroy();
+    charts[id]=new Chart(document.getElementById(id).getContext('2d'),{
+      type:'bar', plugins:[ChartDataLabels],
+      data:{ labels:d.labels, datasets:[{ data:pct, backgroundColor:colors, borderWidth:0, borderRadius:4 }] },
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{display:false},
+          tooltip:{ callbacks:{ label:c=>' '+c.parsed.y.toFixed(1)+'% of clients' }, titleFont:{family:"'Reddit Sans',sans-serif"}, bodyFont:{family:"'Reddit Sans',sans-serif"} },
+          datalabels:{ anchor:'end', align:'end', color:'#374151', font:{family:"'Reddit Sans',sans-serif",size:11,weight:'600'},
+            formatter:v=> v>0? v.toFixed(1)+'%':'' } },
+        scales:{
+          x:{ grid:{display:false}, ticks:{ color:'#374151', font:{family:"'Reddit Sans',sans-serif",size:10.5}, maxRotation:45, minRotation:0, autoSkip:false }, border:{display:false} },
+          y:{ beginAtZero:true, grace:'14%', ticks:{ color:'#6B7280', font:{family:"'Reddit Sans',sans-serif",size:11}, callback:v=>v+'%' }, grid:{ color:'#EEF0F8' }, border:{dash:[4,4],color:'#E2E6EF'} } } }
+    });
+  }
+  window.s4Render=function(){
+    const cl=filtered(), n=cl.length;
+    const al=cl.map(c=>c.a), si=cl.map(c=>c.si);
+    const aE = n? edgesFromInput(document.getElementById('s4-aEdges').value, al):[0,1];
+    const rE = n? edgesFromInput(document.getElementById('s4-rEdges').value, si):[0,1];
+    const aD = n? distribute(al,aE):{labels:[],counts:[],edges:[]};
+    const rD = n? distribute(si,rE):{labels:[],counts:[],edges:[]};
+    const schemeName = st4.scheme==='All'?'All schemes':({'9':'Moderate','10':'Aggressive','11':'Equity'}[st4.scheme]);
+    const trackName = {all:'all clients','3m':'≥3M track record','6m':'≥6M track record','1y':'≥1Y track record'}[st4.track];
+    document.getElementById('s4-note').innerHTML='As on 31/05/2026 &middot; '+schemeName+' &middot; '+trackName+' &middot; n='+n;
+    renderCards(cl);
+    renderChart('s4-alphaChart',aD,n,'alpha'); renderTable('s4-alphaTbl',aD,n);
+    renderChart('s4-retChart',rD,n,'ret'); renderTable('s4-retTbl',rD,n);
+  };
+  window.s4SetScheme=function(v,btn){ st4.scheme=v; document.querySelectorAll('#s4-scheme .pp').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); s4Render(); };
+  window.s4SetTrack=function(v,btn){ st4.track=v; document.querySelectorAll('#s4-track .pp').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); s4Render(); };
+  document.addEventListener('DOMContentLoaded',function(){
+    var a=document.getElementById('s4-aEdges'), r=document.getElementById('s4-rEdges');
+    if(a) a.addEventListener('input',s4Render);
+    if(r) r.addEventListener('input',s4Render);
+  });
+})();
 
 </script>
 </body></html>
