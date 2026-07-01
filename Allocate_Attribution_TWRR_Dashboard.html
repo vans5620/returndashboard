@@ -1077,4 +1077,8 @@ const S4DATA = {"asOn":"30/06/2026","asOnISO":"2026-06-30","schemes":[{"id":"9",
   document.addEventListener('DOMContentLoaded',function(){
     const sel=document.getElementById('s5-month'); if(!sel)return;
     MDATA.months.forEach(function(m){ const o=document.createElement('option'); o.value=m.k; o.textContent=m.label; sel.appendChild(o); });
-    st5.month=
+    st5.month=MDATA.months[MDATA.months.length-1].k; sel.value=st5.month;
+  });
+})();
+</script>
+</body></html>
