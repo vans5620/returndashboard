@@ -550,6 +550,28 @@ footer {
 
     <div class="card">
       <div class="card-head">
+        <div class="card-head-l">
+          <span class="sec-badge" style="background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE">By cohort</span>
+          <span class="card-title">% of Clients by Inception Cohort</span>
+        </div>
+        <div class="card-note">Share of client count &middot; respects scheme filter above</div>
+      </div>
+      <div class="chart-body"><div class="chart-wrap" style="height:300px"><canvas id="s6-clientsChart"></canvas></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-l">
+          <span class="sec-badge" style="background:#F0FDF4;color:#15803D;border-color:#BBF7D0">By cohort</span>
+          <span class="card-title">% of AUM by Inception Cohort</span>
+        </div>
+        <div class="card-note">Share of AUM &middot; respects scheme filter above</div>
+      </div>
+      <div class="chart-body"><div class="chart-wrap" style="height:300px"><canvas id="s6-aumChart"></canvas></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
         <div class="card-head-l"><span class="sec-badge" style="background:#FEF3F2;color:#B42318;border-color:#FECDCA">By cohort</span>
         <span class="card-title">Alpha Bucket Distribution by Inception Cohort</span></div>
         <div class="card-note">AUM-weighted &middot; same buckets as Client Outperformance</div>
@@ -1220,6 +1242,8 @@ const S6DATA = {"asOf":"31/07/2026","schemes":[{"id":"9","name":"Moderate"},{"id
   const POS='#16A34A', NEG='#DC2626';
   let st6 = { scheme: 'All' };
   let s6chart = null;
+  let s6clientsChart = null;
+  let s6aumChart = null;
 
   function recsFor6(cohortKey, scheme){
     const d = S6DATA.data[cohortKey]; if(!d) return [];
@@ -1295,18 +1319,70 @@ const S6DATA = {"asOf":"31/07/2026","schemes":[{"id":"9","name":"Moderate"},{"id
     const ctx = document.getElementById('s6-chart');
     if (ctx) {
       s6chart = new Chart(ctx.getContext('2d'), {
-        type: 'bar',
+        type: 'bar', plugins: [ChartDataLabels],
         data: { labels: labels, datasets: [{ label: 'Mean alpha (AUM-weighted)', data: means, backgroundColor: colors, borderWidth: 0, borderRadius: 3 }] },
         options: {
           responsive: true, maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
             tooltip: { callbacks: { label: function(c){ return c.raw==null ? ' no data' : ' '+(c.raw>=0?'+':'')+c.raw.toFixed(2)+'% mean alpha'; } } },
-            title: { display: true, text: 'Mean Alpha by Inception Cohort \u2014 '+schemeName, font: { size: 12, weight: '600' }, color: '#374151', padding: { bottom: 6 } }
+            title: { display: true, text: 'Mean Alpha by Inception Cohort \u2014 '+schemeName, font: { size: 12, weight: '600' }, color: '#374151', padding: { bottom: 6 } },
+            datalabels: { anchor: 'end', align: function(c){ return (c.dataset.data[c.dataIndex]||0) >= 0 ? 'end' : 'start'; }, color: '#374151', font: { family: "'Reddit Sans',sans-serif", size: 10, weight: '600' }, formatter: function(v){ return v==null ? '' : (v>=0?'+':'')+v.toFixed(1)+'%'; } }
           },
           scales: {
             x: { grid: { display: false }, ticks: { font: { size: 10.5 }, maxRotation: 45 } },
-            y: { ticks: { callback: function(v){ return v+'%'; }, font: { size: 11 } }, grid: { color: '#EEF0F8' } }
+            y: { ticks: { callback: function(v){ return v+'%'; }, font: { size: 11 } }, grid: { color: '#EEF0F8' }, grace: '18%' }
+          }
+        }
+      });
+    }
+
+    // % of Clients and % of AUM by Inception Cohort
+    const cohortBuckets = S6DATA.cohorts.map(function(c){ return bucket6(recsFor6(c.k, scheme)); });
+    const totalClients6 = cohortBuckets.reduce(function(s,b){ return s + (b ? b.valid : 0); }, 0);
+    const totalAUM6 = cohortBuckets.reduce(function(s,b){ return s + (b ? b.aum_cr : 0); }, 0);
+    const clientPct6 = cohortBuckets.map(function(b){ return (b && totalClients6>0) ? +(100*b.valid/totalClients6).toFixed(1) : 0; });
+    const aumPct6 = cohortBuckets.map(function(b){ return (b && totalAUM6>0) ? +(100*b.aum_cr/totalAUM6).toFixed(1) : 0; });
+
+    if (s6clientsChart) { s6clientsChart.destroy(); s6clientsChart = null; }
+    const ctxC = document.getElementById('s6-clientsChart');
+    if (ctxC) {
+      s6clientsChart = new Chart(ctxC.getContext('2d'), {
+        type: 'bar', plugins: [ChartDataLabels],
+        data: { labels: labels, datasets: [{ label: '% of clients', data: clientPct6, backgroundColor: 'rgba(37,99,235,0.82)', borderWidth: 0, borderRadius: 3 }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: function(c){ return ' '+c.raw.toFixed(1)+'% of clients ('+(cohortBuckets[c.dataIndex]?cohortBuckets[c.dataIndex].valid:0)+' clients)'; } } },
+            title: { display: true, text: '% of Clients by Inception Cohort \u2014 '+schemeName, font: { size: 12, weight: '600' }, color: '#374151', padding: { bottom: 6 } },
+            datalabels: { anchor: 'end', align: 'end', color: '#374151', font: { family: "'Reddit Sans',sans-serif", size: 10, weight: '600' }, formatter: function(v){ return v>0 ? v.toFixed(1)+'%' : ''; } }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 10.5 }, maxRotation: 45 } },
+            y: { beginAtZero: true, grace: '18%', ticks: { callback: function(v){ return v+'%'; }, font: { size: 11 } }, grid: { color: '#EEF0F8' } }
+          }
+        }
+      });
+    }
+
+    if (s6aumChart) { s6aumChart.destroy(); s6aumChart = null; }
+    const ctxA = document.getElementById('s6-aumChart');
+    if (ctxA) {
+      s6aumChart = new Chart(ctxA.getContext('2d'), {
+        type: 'bar', plugins: [ChartDataLabels],
+        data: { labels: labels, datasets: [{ label: '% of AUM', data: aumPct6, backgroundColor: 'rgba(21,128,61,0.82)', borderWidth: 0, borderRadius: 3 }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: function(c){ return ' '+c.raw.toFixed(1)+'% of AUM (\u20b9'+(cohortBuckets[c.dataIndex]?cohortBuckets[c.dataIndex].aum_cr.toFixed(1):'0.0')+' cr)'; } } },
+            title: { display: true, text: '% of AUM by Inception Cohort \u2014 '+schemeName, font: { size: 12, weight: '600' }, color: '#374151', padding: { bottom: 6 } },
+            datalabels: { anchor: 'end', align: 'end', color: '#374151', font: { family: "'Reddit Sans',sans-serif", size: 10, weight: '600' }, formatter: function(v){ return v>0 ? v.toFixed(1)+'%' : ''; } }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 10.5 }, maxRotation: 45 } },
+            y: { beginAtZero: true, grace: '18%', ticks: { callback: function(v){ return v+'%'; }, font: { size: 11 } }, grid: { color: '#EEF0F8' } }
           }
         }
       });
